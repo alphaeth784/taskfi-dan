@@ -1,1 +1,377 @@
-'use client'\n\nimport { useState, useEffect } from 'react'\nimport { useSession } from 'next-auth/react'\nimport { useRouter } from 'next/navigation'\nimport { Button } from '@/components/ui/button'\nimport { Input } from '@/components/ui/input'\nimport { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'\nimport { Zap, User, Briefcase, Code, Palette, Shield, Star } from 'lucide-react'\nimport { cn, generateUsername, debounce } from '@/lib/utils'\n\nconst WEB3_CATEGORIES = [\n  { id: 'smart-contract', name: 'Smart Contract Development', icon: Code },\n  { id: 'defi', name: 'DeFi Development', icon: Zap },\n  { id: 'nft', name: 'NFT Development', icon: Palette },\n  { id: 'web3-frontend', name: 'Web3 Frontend', icon: User },\n  { id: 'tokenomics', name: 'Tokenomics', icon: Star },\n  { id: 'blockchain-architecture', name: 'Blockchain Architecture', icon: Shield },\n  { id: 'dao', name: 'DAO Development', icon: Briefcase },\n  { id: 'gamefi', name: 'GameFi Development', icon: Zap },\n  { id: 'security', name: 'Web3 Security', icon: Shield },\n  { id: 'metaverse', name: 'Metaverse Development', icon: User },\n]\n\nconst AVATARS = [\n  '/avatars/blockchain-architect.png',\n  '/avatars/crypto-artist.png',\n  '/avatars/cyberpunk-dev.png',\n  '/avatars/dao-governance.png',\n  '/avatars/defi-trader.png',\n  '/avatars/gamefi-designer.png',\n  '/avatars/metaverse-dev.png',\n  '/avatars/nft-creator.png',\n  '/avatars/rpc-engineer.png',\n  '/avatars/smart-contract-dev.png',\n  '/avatars/solana-validator.png',\n  '/avatars/tokenomics-expert.png',\n  '/avatars/web3-marketing.png',\n  '/avatars/web3-security.png',\n  '/avatars/web3-ui-designer.png',\n]\n\nexport default function OnboardingPage() {\n  const { data: session, status } = useSession()\n  const router = useRouter()\n  const [step, setStep] = useState(1)\n  const [loading, setLoading] = useState(false)\n  const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null)\n  const [checkingUsername, setCheckingUsername] = useState(false)\n  \n  const [formData, setFormData] = useState({\n    name: '',\n    username: '',\n    bio: '',\n    role: '' as 'FREELANCER' | 'HIRER' | '',\n    categories: [] as string[],\n    avatarUrl: '',\n  })\n\n  const [errors, setErrors] = useState<Record<string, string>>({})\n\n  useEffect(() => {\n    if (status === 'loading') return\n    if (!session || session.user.id !== 'new-user') {\n      router.push('/')\n    }\n  }, [session, status, router])\n\n  const checkUsername = debounce(async (username: string) => {\n    if (username.length < 3) {\n      setUsernameAvailable(null)\n      return\n    }\n\n    setCheckingUsername(true)\n    try {\n      const response = await fetch('/api/users/check-username', {\n        method: 'POST',\n        headers: { 'Content-Type': 'application/json' },\n        body: JSON.stringify({ username }),\n      })\n      const data = await response.json()\n      setUsernameAvailable(data.available)\n    } catch (error) {\n      console.error('Username check error:', error)\n    } finally {\n      setCheckingUsername(false)\n    }\n  }, 500)\n\n  useEffect(() => {\n    if (formData.username) {\n      checkUsername(formData.username)\n    }\n  }, [formData.username])\n\n  useEffect(() => {\n    if (formData.name && !formData.username) {\n      setFormData(prev => ({ ...prev, username: generateUsername(prev.name) }))\n    }\n  }, [formData.name, formData.username])\n\n  const validateStep = (stepNumber: number): boolean => {\n    const newErrors: Record<string, string> = {}\n\n    if (stepNumber === 1) {\n      if (!formData.name.trim()) newErrors.name = 'Name is required'\n      if (!formData.username.trim()) newErrors.username = 'Username is required'\n      if (formData.username.length < 3) newErrors.username = 'Username must be at least 3 characters'\n      if (!/^[a-zA-Z0-9_]+$/.test(formData.username)) newErrors.username = 'Username can only contain letters, numbers, and underscores'\n      if (usernameAvailable === false) newErrors.username = 'Username is already taken'\n      if (!formData.role) newErrors.role = 'Please select a role'\n    }\n\n    if (stepNumber === 2 && formData.role === 'FREELANCER') {\n      if (formData.categories.length === 0) newErrors.categories = 'Please select at least one category'\n      if (!formData.avatarUrl) newErrors.avatarUrl = 'Please select an avatar'\n    }\n\n    setErrors(newErrors)\n    return Object.keys(newErrors).length === 0\n  }\n\n  const handleNext = () => {\n    if (validateStep(step)) {\n      if (step === 1 && formData.role === 'HIRER') {\n        handleSubmit() // Skip step 2 for hirers\n      } else {\n        setStep(step + 1)\n      }\n    }\n  }\n\n  const handleSubmit = async () => {\n    if (!validateStep(step)) return\n\n    setLoading(true)\n    try {\n      const response = await fetch('/api/users', {\n        method: 'POST',\n        headers: { 'Content-Type': 'application/json' },\n        body: JSON.stringify({\n          ...formData,\n          walletAddress: session?.user.walletAddress,\n        }),\n      })\n\n      if (response.ok) {\n        // Refresh session and redirect to dashboard\n        window.location.href = formData.role === 'FREELANCER' ? '/freelancer' : '/hirer'\n      } else {\n        const error = await response.json()\n        setErrors({ submit: error.error || 'Failed to create account' })\n      }\n    } catch (error) {\n      setErrors({ submit: 'Network error. Please try again.' })\n    } finally {\n      setLoading(false)\n    }\n  }\n\n  const toggleCategory = (categoryId: string) => {\n    setFormData(prev => ({\n      ...prev,\n      categories: prev.categories.includes(categoryId)\n        ? prev.categories.filter(id => id !== categoryId)\n        : prev.categories.length < 3\n        ? [...prev.categories, categoryId]\n        : prev.categories\n    }))\n  }\n\n  if (status === 'loading') {\n    return (\n      <div className=\"min-h-screen flex items-center justify-center\">\n        <div className=\"animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full\"></div>\n      </div>\n    )\n  }\n\n  return (\n    <div className=\"min-h-screen bg-gradient-to-br from-background to-background/80 flex items-center justify-center p-4\">\n      <Card className=\"w-full max-w-2xl web3-card\">\n        <CardHeader className=\"text-center\">\n          <div className=\"flex items-center justify-center space-x-2 mb-4\">\n            <div className=\"w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center\">\n              <Zap className=\"h-5 w-5 text-white\" />\n            </div>\n            <span className=\"text-xl font-bold gradient-text\">TaskFi</span>\n          </div>\n          <CardTitle className=\"text-2xl\">Welcome to TaskFi</CardTitle>\n          <CardDescription>\n            {step === 1 ? 'Tell us about yourself' : 'Choose your expertise'}\n          </CardDescription>\n        </CardHeader>\n\n        <CardContent className=\"space-y-6\">\n          {/* Step 1: Basic Info */}\n          {step === 1 && (\n            <div className=\"space-y-4\">\n              <div>\n                <label className=\"block text-sm font-medium mb-2\">Full Name</label>\n                <Input\n                  placeholder=\"Enter your full name\"\n                  value={formData.name}\n                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}\n                  error={errors.name}\n                />\n              </div>\n\n              <div>\n                <label className=\"block text-sm font-medium mb-2\">Username</label>\n                <Input\n                  placeholder=\"Choose a unique username\"\n                  value={formData.username}\n                  onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value }))}\n                  error={errors.username}\n                />\n                {checkingUsername && (\n                  <p className=\"text-xs text-muted-foreground mt-1\">Checking availability...</p>\n                )}\n                {usernameAvailable === true && (\n                  <p className=\"text-xs text-green-600 mt-1\">Username is available!</p>\n                )}\n                {usernameAvailable === false && (\n                  <p className=\"text-xs text-red-600 mt-1\">Username is already taken</p>\n                )}\n              </div>\n\n              <div>\n                <label className=\"block text-sm font-medium mb-2\">Bio (Optional)</label>\n                <textarea\n                  className=\"w-full min-h-[80px] px-3 py-2 border border-input rounded-md bg-transparent text-sm resize-none focus:outline-none focus:ring-1 focus:ring-ring\"\n                  placeholder=\"Tell us about yourself...\"\n                  value={formData.bio}\n                  onChange={(e) => setFormData(prev => ({ ...prev, bio: e.target.value }))}\n                  maxLength={500}\n                />\n                <p className=\"text-xs text-muted-foreground mt-1\">\n                  {formData.bio.length}/500 characters\n                </p>\n              </div>\n\n              <div>\n                <label className=\"block text-sm font-medium mb-2\">I am a...</label>\n                <div className=\"grid grid-cols-2 gap-4\">\n                  <button\n                    type=\"button\"\n                    onClick={() => setFormData(prev => ({ ...prev, role: 'FREELANCER' }))}\n                    className={cn(\n                      'p-4 rounded-lg border-2 transition-all text-left',\n                      formData.role === 'FREELANCER'\n                        ? 'border-primary bg-primary/10'\n                        : 'border-border hover:border-primary/50'\n                    )}\n                  >\n                    <Code className=\"h-6 w-6 mb-2 text-primary\" />\n                    <h3 className=\"font-medium\">Freelancer</h3>\n                    <p className=\"text-sm text-muted-foreground\">I want to offer my Web3 services</p>\n                  </button>\n                  <button\n                    type=\"button\"\n                    onClick={() => setFormData(prev => ({ ...prev, role: 'HIRER' }))}\n                    className={cn(\n                      'p-4 rounded-lg border-2 transition-all text-left',\n                      formData.role === 'HIRER'\n                        ? 'border-primary bg-primary/10'\n                        : 'border-border hover:border-primary/50'\n                    )}\n                  >\n                    <Briefcase className=\"h-6 w-6 mb-2 text-secondary\" />\n                    <h3 className=\"font-medium\">Hirer</h3>\n                    <p className=\"text-sm text-muted-foreground\">I want to hire Web3 talent</p>\n                  </button>\n                </div>\n                {errors.role && <p className=\"text-xs text-destructive mt-1\">{errors.role}</p>}\n              </div>\n            </div>\n          )}\n\n          {/* Step 2: Categories and Avatar (Freelancers only) */}\n          {step === 2 && formData.role === 'FREELANCER' && (\n            <div className=\"space-y-6\">\n              <div>\n                <label className=\"block text-sm font-medium mb-2\">\n                  Select your expertise (up to 3)\n                </label>\n                <div className=\"grid grid-cols-2 gap-3\">\n                  {WEB3_CATEGORIES.map((category) => {\n                    const Icon = category.icon\n                    const isSelected = formData.categories.includes(category.id)\n                    return (\n                      <button\n                        key={category.id}\n                        type=\"button\"\n                        onClick={() => toggleCategory(category.id)}\n                        disabled={!isSelected && formData.categories.length >= 3}\n                        className={cn(\n                          'p-3 rounded-lg border-2 transition-all text-left text-sm',\n                          isSelected\n                            ? 'border-primary bg-primary/10'\n                            : 'border-border hover:border-primary/50',\n                          !isSelected && formData.categories.length >= 3 && 'opacity-50 cursor-not-allowed'\n                        )}\n                      >\n                        <Icon className=\"h-4 w-4 mb-1 text-primary\" />\n                        <div className=\"font-medium\">{category.name}</div>\n                      </button>\n                    )\n                  })}\n                </div>\n                {errors.categories && <p className=\"text-xs text-destructive mt-1\">{errors.categories}</p>}\n                <p className=\"text-xs text-muted-foreground mt-2\">\n                  Selected: {formData.categories.length}/3\n                </p>\n              </div>\n\n              <div>\n                <label className=\"block text-sm font-medium mb-2\">Choose your avatar</label>\n                <div className=\"grid grid-cols-5 gap-3\">\n                  {AVATARS.map((avatar, index) => (\n                    <button\n                      key={index}\n                      type=\"button\"\n                      onClick={() => setFormData(prev => ({ ...prev, avatarUrl: avatar }))}\n                      className={cn(\n                        'aspect-square rounded-lg border-2 overflow-hidden transition-all',\n                        formData.avatarUrl === avatar\n                          ? 'border-primary scale-105'\n                          : 'border-border hover:border-primary/50'\n                      )}\n                    >\n                      <img\n                        src={avatar}\n                        alt={`Avatar ${index + 1}`}\n                        className=\"w-full h-full object-cover\"\n                      />\n                    </button>\n                  ))}\n                </div>\n                {errors.avatarUrl && <p className=\"text-xs text-destructive mt-1\">{errors.avatarUrl}</p>}\n              </div>\n            </div>\n          )}\n\n          {errors.submit && (\n            <div className=\"p-3 bg-destructive/10 border border-destructive/20 rounded-lg\">\n              <p className=\"text-sm text-destructive\">{errors.submit}</p>\n            </div>\n          )}\n\n          <div className=\"flex justify-between pt-4\">\n            {step > 1 && (\n              <Button\n                variant=\"outline\"\n                onClick={() => setStep(step - 1)}\n                disabled={loading}\n              >\n                Back\n              </Button>\n            )}\n            \n            <Button\n              onClick={step === 2 || formData.role === 'HIRER' ? handleSubmit : handleNext}\n              loading={loading}\n              variant=\"gradient\"\n              className=\"ml-auto\"\n            >\n              {loading ? 'Creating Account...' : \n               step === 2 || formData.role === 'HIRER' ? 'Complete Setup' : 'Next'}\n            </Button>\n          </div>\n        </CardContent>\n      </Card>\n    </div>\n  )\n}"
+'use client'
+
+import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Zap, User, Briefcase, Code, Palette, Shield, Star } from 'lucide-react'
+import { cn, generateUsername, debounce } from '@/lib/utils'
+
+const WEB3_CATEGORIES = [
+  { id: 'smart-contract', name: 'Smart Contract Development', icon: Code },
+  { id: 'defi', name: 'DeFi Development', icon: Zap },
+  { id: 'nft', name: 'NFT Development', icon: Palette },
+  { id: 'web3-frontend', name: 'Web3 Frontend', icon: User },
+  { id: 'tokenomics', name: 'Tokenomics', icon: Star },
+  { id: 'blockchain-architecture', name: 'Blockchain Architecture', icon: Shield },
+  { id: 'dao', name: 'DAO Development', icon: Briefcase },
+  { id: 'gamefi', name: 'GameFi Development', icon: Zap },
+  { id: 'security', name: 'Web3 Security', icon: Shield },
+  { id: 'metaverse', name: 'Metaverse Development', icon: User },
+]
+
+const AVATARS = [
+  '/avatars/blockchain-architect.png',
+  '/avatars/crypto-artist.png',
+  '/avatars/cyberpunk-dev.png',
+  '/avatars/dao-governance.png',
+  '/avatars/defi-trader.png',
+  '/avatars/gamefi-designer.png',
+  '/avatars/metaverse-dev.png',
+  '/avatars/nft-creator.png',
+  '/avatars/rpc-engineer.png',
+  '/avatars/smart-contract-dev.png',
+  '/avatars/solana-validator.png',
+  '/avatars/tokenomics-expert.png',
+  '/avatars/web3-marketing.png',
+  '/avatars/web3-security.png',
+  '/avatars/web3-ui-designer.png',
+]
+
+export default function OnboardingPage() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  const [step, setStep] = useState(1)
+  const [loading, setLoading] = useState(false)
+  const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null)
+  const [checkingUsername, setCheckingUsername] = useState(false)
+  
+  const [formData, setFormData] = useState({
+    name: '',
+    username: '',
+    bio: '',
+    role: '' as 'FREELANCER' | 'HIRER' | '',
+    categories: [] as string[],
+    avatarUrl: '',
+  })
+
+  const [errors, setErrors] = useState<Record<string, string>>({})
+
+  useEffect(() => {
+    if (status === 'loading') return
+    if (!session || session.user.id !== 'new-user') {
+      router.push('/')
+    }
+  }, [session, status, router])
+
+  const checkUsername = debounce(async (username: string) => {
+    if (username.length < 3) {
+      setUsernameAvailable(null)
+      return
+    }
+
+    setCheckingUsername(true)
+    try {
+      const response = await fetch('/api/users/check-username', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username }),
+      })
+      const data = await response.json()
+      setUsernameAvailable(data.available)
+    } catch (error) {
+      console.error('Username check error:', error)
+    } finally {
+      setCheckingUsername(false)
+    }
+  }, 500)
+
+  useEffect(() => {
+    if (formData.username) {
+      checkUsername(formData.username)
+    }
+  }, [formData.username])
+
+  useEffect(() => {
+    if (formData.name && !formData.username) {
+      setFormData(prev => ({ ...prev, username: generateUsername(prev.name) }))
+    }
+  }, [formData.name, formData.username])
+
+  const validateStep = (stepNumber: number): boolean => {
+    const newErrors: Record<string, string> = {}
+
+    if (stepNumber === 1) {
+      if (!formData.name.trim()) newErrors.name = 'Name is required'
+      if (!formData.username.trim()) newErrors.username = 'Username is required'
+      if (formData.username.length < 3) newErrors.username = 'Username must be at least 3 characters'
+      if (!/^[a-zA-Z0-9_]+$/.test(formData.username)) newErrors.username = 'Username can only contain letters, numbers, and underscores'
+      if (usernameAvailable === false) newErrors.username = 'Username is already taken'
+      if (!formData.role) newErrors.role = 'Please select a role'
+    }
+
+    if (stepNumber === 2 && formData.role === 'FREELANCER') {
+      if (formData.categories.length === 0) newErrors.categories = 'Please select at least one category'
+      if (!formData.avatarUrl) newErrors.avatarUrl = 'Please select an avatar'
+    }
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const handleNext = () => {
+    if (validateStep(step)) {
+      if (step === 1 && formData.role === 'HIRER') {
+        handleSubmit() // Skip step 2 for hirers
+      } else {
+        setStep(step + 1)
+      }
+    }
+  }
+
+  const handleSubmit = async () => {
+    if (!validateStep(step)) return
+
+    setLoading(true)
+    try {
+      const response = await fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...formData,
+          walletAddress: session?.user.walletAddress,
+        }),
+      })
+
+      if (response.ok) {
+        // Refresh session and redirect to dashboard
+        window.location.href = formData.role === 'FREELANCER' ? '/freelancer' : '/hirer'
+      } else {
+        const error = await response.json()
+        setErrors({ submit: error.error || 'Failed to create account' })
+      }
+    } catch (error) {
+      setErrors({ submit: 'Network error. Please try again.' })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const toggleCategory = (categoryId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      categories: prev.categories.includes(categoryId)
+        ? prev.categories.filter(id => id !== categoryId)
+        : prev.categories.length < 3
+        ? [...prev.categories, categoryId]
+        : prev.categories
+    }))
+  }
+
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full"></div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-background to-background/80 flex items-center justify-center p-4">
+      <Card className="w-full max-w-2xl web3-card">
+        <CardHeader className="text-center">
+          <div className="flex items-center justify-center space-x-2 mb-4">
+            <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
+              <Zap className="h-5 w-5 text-white" />
+            </div>
+            <span className="text-xl font-bold gradient-text">TaskFi</span>
+          </div>
+          <CardTitle className="text-2xl">Welcome to TaskFi</CardTitle>
+          <CardDescription>
+            {step === 1 ? 'Tell us about yourself' : 'Choose your expertise'}
+          </CardDescription>
+        </CardHeader>
+
+        <CardContent className="space-y-6">
+          {/* Step 1: Basic Info */}
+          {step === 1 && (
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Full Name</label>
+                <Input
+                  placeholder="Enter your full name"
+                  value={formData.name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                  error={errors.name}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Username</label>
+                <Input
+                  placeholder="Choose a unique username"
+                  value={formData.username}
+                  onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value }))}
+                  error={errors.username}
+                />
+                {checkingUsername && (
+                  <p className="text-xs text-muted-foreground mt-1">Checking availability...</p>
+                )}
+                {usernameAvailable === true && (
+                  <p className="text-xs text-green-600 mt-1">Username is available!</p>
+                )}
+                {usernameAvailable === false && (
+                  <p className="text-xs text-red-600 mt-1">Username is already taken</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Bio (Optional)</label>
+                <textarea
+                  className="w-full min-h-[80px] px-3 py-2 border border-input rounded-md bg-transparent text-sm resize-none focus:outline-none focus:ring-1 focus:ring-ring"
+                  placeholder="Tell us about yourself..."
+                  value={formData.bio}
+                  onChange={(e) => setFormData(prev => ({ ...prev, bio: e.target.value }))}
+                  maxLength={500}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  {formData.bio.length}/500 characters
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">I am a...</label>
+                <div className="grid grid-cols-2 gap-4">
+                  <button
+                    type="button"
+                    onClick={() => setFormData(prev => ({ ...prev, role: 'FREELANCER' }))}
+                    className={cn(
+                      'p-4 rounded-lg border-2 transition-all text-left',
+                      formData.role === 'FREELANCER'
+                        ? 'border-primary bg-primary/10'
+                        : 'border-border hover:border-primary/50'
+                    )}
+                  >
+                    <Code className="h-6 w-6 mb-2 text-primary" />
+                    <h3 className="font-medium">Freelancer</h3>
+                    <p className="text-sm text-muted-foreground">I want to offer my Web3 services</p>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormData(prev => ({ ...prev, role: 'HIRER' }))}
+                    className={cn(
+                      'p-4 rounded-lg border-2 transition-all text-left',
+                      formData.role === 'HIRER'
+                        ? 'border-primary bg-primary/10'
+                        : 'border-border hover:border-primary/50'
+                    )}
+                  >
+                    <Briefcase className="h-6 w-6 mb-2 text-secondary" />
+                    <h3 className="font-medium">Hirer</h3>
+                    <p className="text-sm text-muted-foreground">I want to hire Web3 talent</p>
+                  </button>
+                </div>
+                {errors.role && <p className="text-xs text-destructive mt-1">{errors.role}</p>}
+              </div>
+            </div>
+          )}
+
+          {/* Step 2: Categories and Avatar (Freelancers only) */}
+          {step === 2 && formData.role === 'FREELANCER' && (
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Select your expertise (up to 3)
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  {WEB3_CATEGORIES.map((category) => {
+                    const Icon = category.icon
+                    const isSelected = formData.categories.includes(category.id)
+                    return (
+                      <button
+                        key={category.id}
+                        type="button"
+                        onClick={() => toggleCategory(category.id)}
+                        disabled={!isSelected && formData.categories.length >= 3}
+                        className={cn(
+                          'p-3 rounded-lg border-2 transition-all text-left text-sm',
+                          isSelected
+                            ? 'border-primary bg-primary/10'
+                            : 'border-border hover:border-primary/50',
+                          !isSelected && formData.categories.length >= 3 && 'opacity-50 cursor-not-allowed'
+                        )}
+                      >
+                        <Icon className="h-4 w-4 mb-1 text-primary" />
+                        <div className="font-medium">{category.name}</div>
+                      </button>
+                    )
+                  })}
+                </div>
+                {errors.categories && <p className="text-xs text-destructive mt-1">{errors.categories}</p>}
+                <p className="text-xs text-muted-foreground mt-2">
+                  Selected: {formData.categories.length}/3
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Choose your avatar</label>
+                <div className="grid grid-cols-5 gap-3">
+                  {AVATARS.map((avatar, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, avatarUrl: avatar }))}
+                      className={cn(
+                        'aspect-square rounded-lg border-2 overflow-hidden transition-all',
+                        formData.avatarUrl === avatar
+                          ? 'border-primary scale-105'
+                          : 'border-border hover:border-primary/50'
+                      )}
+                    >
+                      <img
+                        src={avatar}
+                        alt={`Avatar ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+                {errors.avatarUrl && <p className="text-xs text-destructive mt-1">{errors.avatarUrl}</p>}
+              </div>
+            </div>
+          )}
+
+          {errors.submit && (
+            <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+              <p className="text-sm text-destructive">{errors.submit}</p>
+            </div>
+          )}
+
+          <div className="flex justify-between pt-4">
+            {step > 1 && (
+              <Button
+                variant="outline"
+                onClick={() => setStep(step - 1)}
+                disabled={loading}
+              >
+                Back
+              </Button>
+            )}
+            
+            <Button
+              onClick={step === 2 || formData.role === 'HIRER' ? handleSubmit : handleNext}
+              loading={loading}
+              variant="gradient"
+              className="ml-auto"
+            >
+              {loading ? 'Creating Account...' : 
+               step === 2 || formData.role === 'HIRER' ? 'Complete Setup' : 'Next'}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
