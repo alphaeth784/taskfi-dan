@@ -110,6 +110,7 @@ export async function GET(
     console.error('Error fetching messages:', error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
+}
 
 export async function POST(
   request: NextRequest,

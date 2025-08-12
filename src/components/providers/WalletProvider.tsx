@@ -14,7 +14,13 @@ interface Props {
 }
 
 export default function WalletContextProvider({ children }: Props) {
-  const network = (process.env.NEXT_PUBLIC_SOLANA_NETWORK as WalletAdapterNetwork) || WalletAdapterNetwork.Devnet
+  const network = useMemo(() => {
+    const envNetwork = process.env.NEXT_PUBLIC_SOLANA_NETWORK
+    if (envNetwork === 'mainnet-beta') return WalletAdapterNetwork.Mainnet
+    if (envNetwork === 'devnet') return WalletAdapterNetwork.Devnet
+    if (envNetwork === 'testnet') return WalletAdapterNetwork.Testnet
+    return WalletAdapterNetwork.Devnet
+  }, [])
   
   const endpoint = useMemo(() => {
     if (process.env.NEXT_PUBLIC_SOLANA_RPC_URL) {

@@ -70,14 +70,22 @@ export async function GET(request: NextRequest, props: { params: Promise<{ id: s
 
     if (!canView) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
     // Hide sensitive data for non-owners
     if (application.job.hirerId !== session.user.id && !PermissionService.canAccessUserManagement(session.user.role)) {
       const { coverLetter, proposedBudget, estimatedDays, attachments, ...publicData } = application
-      return NextResponse.json({ application });
+      return NextResponse.json({ application: publicData });
+    }
+
+    return NextResponse.json({ application });
   } catch (error) {
     console.error('Get application error:', error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
-// PUT /api/jobs/[id]/applications/[applicationId] - Update application (freelancer only);
+  }
+}
+
+// PUT /api/jobs/[id]/applications/[applicationId] - Update application (freelancer only)
 export async function PUT(request: NextRequest, props: { params: Promise<{ id: string; applicationId: string }> }) {
   const params = await props.params;
   try {

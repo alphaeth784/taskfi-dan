@@ -367,7 +367,8 @@ export async function DELETE(request: NextRequest, props: { params: Promise<{ id
             activePayments,
           }
         },
-        return NextResponse.json({ error: "Internal server error" }, { status: 400 });
+        { status: 400 }
+      )
     }
 
     // Soft delete - deactivate user

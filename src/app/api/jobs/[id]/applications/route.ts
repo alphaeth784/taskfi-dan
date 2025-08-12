@@ -108,6 +108,8 @@ export async function GET(request: NextRequest, props: { params: Promise<{ id: s
       averageEstimatedDays: applications.length > 0
         ? applications.reduce((sum, app) => sum + app.estimatedDays, 0) / applications.length
         : 0,
+    }
+
     return NextResponse.json({ applications, stats });
   } catch (error) {
     console.error('Get applications error:', error)

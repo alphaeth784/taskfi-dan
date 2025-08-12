@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import WalletContextProvider from "@/components/providers/WalletProvider";
+import ClientProviders from "@/components/providers/ClientProviders";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,6 +16,13 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "TaskFi - Decentralized Freelance Marketplace",
   description: "Connect with Web3 freelancers and hirers on Solana. Secure escrow payments, exclusive job assignments, and premium Web3 experience.",
+  keywords: ['Web3', 'Freelance', 'Solana', 'Blockchain', 'Crypto', 'Escrow'],
+  authors: [{ name: 'TaskFi Team' }],
+  openGraph: {
+    title: 'TaskFi - Decentralized Freelance Marketplace',
+    description: 'Connect with Web3 freelancers and hirers on Solana. Secure escrow payments, exclusive job assignments, and premium Web3 experience.',
+    type: 'website',
+  },
 };
 
 export default function RootLayout({
@@ -28,9 +35,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased dark`}
       >
-        <WalletContextProvider>
+        <ClientProviders>
           {children}
-        </WalletContextProvider>
+        </ClientProviders>
       </body>
     </html>
   );

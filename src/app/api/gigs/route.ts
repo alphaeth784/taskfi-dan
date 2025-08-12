@@ -318,7 +318,9 @@ export async function POST(request: NextRequest) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Validation error', details: error.errors },
-    return NextResponse.json({ error: "Internal server error" }, { status: 400 });
+        { status: 400 }
+      );
+    }
     }
 
     console.error('Create gig error:', error)
