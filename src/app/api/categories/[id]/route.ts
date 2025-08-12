@@ -11,12 +11,9 @@ const updateCategorySchema = z.object({
   isActive: z.boolean().optional(),
 })
 
-interface RouteParams {
-  params: { id: string }
-}
-
 // GET /api/categories/[id] - Get category with jobs and gigs
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const category = await prisma.category.findUnique({
       where: { id: params.id },
@@ -91,17 +88,14 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 }
 
 // PUT /api/categories/[id] - Update category (admin only)
-export async function PUT(request: NextRequest, { params }: RouteParams) {
+export async function PUT(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions)
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     if (!PermissionService.canManageCategories(session.user.role)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
-
     const body = await request.json()
     const updateData = updateCategorySchema.parse(body)
 
@@ -120,42 +114,36 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
           { status: 400 }
         )
       }
-    }
-
     const category = await prisma.category.update({
       where: { id: params.id },
       data: updateData,
-    })
+    });
 
-    return NextResponse.json({ category })
+    return NextResponse.json({ category });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Validation error', details: error.errors },
         { status: 400 }
-      )
+      );
     }
-
-    console.error('Update category error:', error)
+    console.error('Update category error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
-    )
+    );
   }
 }
 
 // DELETE /api/categories/[id] - Delete category (admin only)
-export async function DELETE(request: NextRequest, { params }: RouteParams) {
+export async function DELETE(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions)
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     if (!PermissionService.canManageCategories(session.user.role)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
-
     // Check if category has associated jobs or gigs
     const categoryUsage = await prisma.category.findUnique({
       where: { id: params.id },
@@ -171,8 +159,6 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     if (!categoryUsage) {
       return NextResponse.json({ error: 'Category not found' }, { status: 404 })
-    }
-
     if (categoryUsage._count.jobs > 0 || categoryUsage._count.gigs > 0) {
       // Soft delete by setting isActive to false
       await prisma.category.update({
@@ -194,4 +180,3 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       { status: 500 }
     )
   }
-}

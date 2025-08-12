@@ -15,18 +15,14 @@ const updateApplicationSchema = z.object({
   isAccepted: z.boolean(),
 })
 
-interface RouteParams {
-  params: { id: string }
-}
 
 // GET /api/jobs/[id]/applications - Get all applications for a job
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions)
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     // Verify job exists
     const job = await prisma.job.findUnique({
       where: { id: params.id },
@@ -35,8 +31,6 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     if (!job) {
       return NextResponse.json({ error: 'Job not found' }, { status: 404 })
-    }
-
     // Only job owner, applicants, or admins can view applications
     const canViewApplications = 
       job.hirerId === session.user.id || 
@@ -55,8 +49,6 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
       if (!userApplication) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-      }
-
       // Return only user's own application
       const application = await prisma.jobApplication.findUnique({
         where: { id: userApplication.id },
@@ -79,8 +71,6 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       })
 
       return NextResponse.json({ applications: [application] })
-    }
-
     // Job owner or admin - return all applications
     const applications = await prisma.jobApplication.findMany({
       where: { jobId: params.id },
@@ -117,8 +107,6 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       averageEstimatedDays: applications.length > 0
         ? applications.reduce((sum, app) => sum + app.estimatedDays, 0) / applications.length
         : 0,
-    }
-
     return NextResponse.json({ applications, stats })
   } catch (error) {
     console.error('Get applications error:', error)
@@ -126,22 +114,16 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       { error: 'Internal server error' },
       { status: 500 }
     )
-  }
-}
-
 // POST /api/jobs/[id]/applications - Apply to a job
-export async function POST(request: NextRequest, { params }: RouteParams) {
+export async function POST(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions)
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     // Only freelancers can apply
     if (!PermissionService.canApplyToJobs(session.user.role)) {
       return NextResponse.json({ error: 'Only freelancers can apply to jobs' }, { status: 403 })
-    }
-
     const body = await request.json()
     const applicationData = createApplicationSchema.parse(body)
 
@@ -163,29 +145,19 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     if (!job) {
       return NextResponse.json({ error: 'Job not found' }, { status: 404 })
-    }
-
     if (job.status !== 'OPEN') {
       return NextResponse.json({ error: 'Job is no longer accepting applications' }, { status: 400 })
-    }
-
     // Can't apply to own job
     if (job.hirerId === session.user.id) {
       return NextResponse.json({ error: 'Cannot apply to your own job' }, { status: 400 })
-    }
-
     // Check if job already has an accepted application (exclusive hiring)
     if (job.applications.length > 0) {
       return NextResponse.json({ error: 'This job has already been filled' }, { status: 400 })
-    }
-
     // Validate proposed budget is reasonable (within 20% above job budget)
     if (applicationData.proposedBudget > job.budget * 1.2) {
       return NextResponse.json({ 
         error: `Proposed budget cannot exceed ${(job.budget * 1.2).toFixed(2)}` 
       }, { status: 400 })
-    }
-
     // Check if user already applied
     const existingApplication = await prisma.jobApplication.findUnique({
       where: {
@@ -198,8 +170,6 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     if (existingApplication) {
       return NextResponse.json({ error: 'You have already applied to this job' }, { status: 400 })
-    }
-
     // Create application
     const application = await prisma.jobApplication.create({
       data: {
@@ -260,24 +230,18 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         { error: 'Validation error', details: error.errors },
         { status: 400 }
       )
-    }
-
     console.error('Create application error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
     )
-  }
-}
-
 // PUT /api/jobs/[id]/applications - Accept or reject applications (batch or single)
-export async function PUT(request: NextRequest, { params }: RouteParams) {
+export async function PUT(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions)
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     const body = await request.json()
     
     // Handle batch updates (for accepting one and rejecting others)
@@ -298,34 +262,22 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
       if (!job) {
         return NextResponse.json({ error: 'Job not found' }, { status: 404 })
-      }
-
       const canUpdate = job.hirerId === session.user.id || 
                        PermissionService.canAccessUserManagement(session.user.role)
 
       if (!canUpdate) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-      }
-
       if (job.status !== 'OPEN') {
         return NextResponse.json({ error: 'Cannot update applications for non-open jobs' }, { status: 400 })
-      }
-
       // Check if job already has accepted application
       if (job.applications.length > 0) {
         return NextResponse.json({ error: 'This job already has an accepted freelancer' }, { status: 400 })
-      }
-
       // Validate applications array
       const acceptedCount = body.applications.filter(app => app.isAccepted === true).length
       if (acceptedCount > 1) {
         return NextResponse.json({ error: 'Can only accept one application per job' }, { status: 400 })
-      }
-
       if (acceptedCount === 0) {
         return NextResponse.json({ error: 'Must accept at least one application' }, { status: 400 })
-      }
-
       // Update applications in transaction
       const updatedApplications = await prisma.$transaction(async (tx) => {
         const updates = []
@@ -366,8 +318,6 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
               }
             }
           })
-        }
-
         // If there's an accepted application, update job status
         const acceptedApp = updates.find(app => app.isAccepted === true)
         if (acceptedApp) {
@@ -378,14 +328,10 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
               freelancerId: acceptedApp.freelancerId
             }
           })
-        }
-
         return updates
       })
 
       return NextResponse.json({ applications: updatedApplications })
-    }
-
     // Handle single application update
     const { applicationId, isAccepted } = updateApplicationSchema.parse(body)
     
@@ -419,24 +365,16 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     if (!application) {
       return NextResponse.json({ error: 'Application not found' }, { status: 404 })
-    }
-
     const canUpdate = application.job.hirerId === session.user.id || 
                      PermissionService.canAccessUserManagement(session.user.role)
 
     if (!canUpdate) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
-
     if (application.job.status !== 'OPEN') {
       return NextResponse.json({ error: 'Cannot update applications for non-open jobs' }, { status: 400 })
-    }
-
     // If accepting and job already has accepted application
     if (isAccepted && application.job.applications.length > 0) {
       return NextResponse.json({ error: 'This job already has an accepted freelancer' }, { status: 400 })
-    }
-
     // Update application
     const updatedApplication = await prisma.$transaction(async (tx) => {
       const updated = await tx.jobApplication.update({
@@ -492,8 +430,6 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
           },
           data: { isAccepted: false }
         })
-      }
-
       return updated
     })
 
@@ -504,12 +440,9 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         { error: 'Validation error', details: error.errors },
         { status: 400 }
       )
-    }
-
     console.error('Update application error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
     )
   }
-}

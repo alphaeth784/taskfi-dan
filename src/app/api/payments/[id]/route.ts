@@ -12,18 +12,14 @@ const updatePaymentSchema = z.object({
   releaseDate: z.string().datetime().optional(),
 })
 
-interface RouteParams {
-  params: { id: string }
-}
 
 // GET /api/payments/[id] - Get payment details
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions)
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     const payment = await prisma.payment.findUnique({
       where: { id: params.id },
       include: {
@@ -85,8 +81,6 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     if (!payment) {
       return NextResponse.json({ error: 'Payment not found' }, { status: 404 })
-    }
-
     // Check if user has access to this payment
     const freelancerId = payment.job?.freelancerId || payment.gig?.freelancerId
     const hirerId = payment.job?.hirerId || payment.payerId
@@ -98,8 +92,6 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     if (!canView) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
-
     // Add escrow information for smart contract integration
     let escrowInfo = null
     if (payment.status === 'ESCROW' && payment.escrowAddress) {
@@ -111,8 +103,6 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         canDispute: payment.payerId === session.user.id,
         releaseDate: payment.releaseDate,
       }
-    }
-
     return NextResponse.json({ 
       payment: {
         ...payment,
@@ -125,17 +115,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       { error: 'Internal server error' },
       { status: 500 }
     )
-  }
-}
-
 // PUT /api/payments/[id] - Update payment status (release, dispute, etc.)
-export async function PUT(request: NextRequest, { params }: RouteParams) {
+export async function PUT(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions)
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     const body = await request.json()
     const updateData = updatePaymentSchema.parse(body)
 
@@ -164,8 +150,6 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     if (!payment) {
       return NextResponse.json({ error: 'Payment not found' }, { status: 404 })
-    }
-
     const freelancerId = payment.job?.freelancerId || payment.gig?.freelancerId
     const hirerId = payment.job?.hirerId || payment.payerId
 
@@ -186,8 +170,6 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
               { error: 'Can only release funds from escrow' },
               { status: 400 }
             )
-          }
-
           updatePayload = {
             status: 'RELEASED',
             releaseDate: new Date(),
@@ -203,15 +185,11 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
               { error: 'Can only dispute payments in escrow' },
               { status: 400 }
             )
-          }
-
           if (!updateData.disputeReason) {
             return NextResponse.json(
               { error: 'Dispute reason is required' },
               { status: 400 }
             )
-          }
-
           updatePayload = {
             status: 'DISPUTED',
             disputeReason: updateData.disputeReason,
@@ -227,8 +205,6 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
               { error: 'Can only refund disputed payments' },
               { status: 400 }
             )
-          }
-
           updatePayload = {
             status: 'REFUNDED',
             releaseDate: new Date(),
@@ -244,8 +220,6 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
               { error: 'Can only move pending payments to escrow' },
               { status: 400 }
             )
-          }
-
           updatePayload = {
             status: 'ESCROW',
             escrowAddress: updateData.escrowAddress,
@@ -267,12 +241,8 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         transactionHash: updateData.transactionHash,
         releaseDate: updateData.releaseDate ? new Date(updateData.releaseDate) : undefined,
       }
-    }
-
     if (!canUpdate) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
-
     // Update payment and handle side effects
     const updatedPayment = await prisma.$transaction(async (tx) => {
       const updated = await tx.payment.update({
@@ -321,8 +291,6 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
             where: { id: payment.job.id },
             data: { status: 'COMPLETED' }
           })
-        }
-
         // Update freelancer stats
         await tx.user.update({
           where: { id: freelancerId },
@@ -348,8 +316,6 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
             }
           }
         })
-      }
-
       if (updateData.status === 'DISPUTED') {
         // Notify admin about dispute
         const admins = await tx.user.findMany({
@@ -373,8 +339,6 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
               }
             }
           })
-        }
-
         // Notify freelancer
         if (freelancerId) {
           await tx.notification.create({
@@ -390,8 +354,6 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
             }
           })
         }
-      }
-
       if (updateData.status === 'REFUNDED') {
         // Notify payer of refund
         await tx.notification.create({
@@ -420,8 +382,6 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
             data: { totalEarned: { decrement: payment.amount } }
           })
         }
-      }
-
       return updated
     })
 
@@ -432,12 +392,9 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         { error: 'Validation error', details: error.errors },
         { status: 400 }
       )
-    }
-
     console.error('Update payment error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
     )
   }
-}

@@ -12,23 +12,17 @@ const purchaseSchema = z.object({
   urgentDelivery: z.boolean().default(false), // 25% extra fee
 })
 
-interface RouteParams {
-  params: { id: string }
-}
 
 // POST /api/gigs/[id]/purchase - Purchase a gig package
-export async function POST(request: NextRequest, { params }: RouteParams) {
+export async function POST(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions)
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     // Only hirers and verified users can purchase gigs
     if (session.user.role !== 'HIRER' && session.user.role !== 'ADMIN') {
       return NextResponse.json({ error: 'Only hirers can purchase gigs' }, { status: 403 })
-    }
-
     const body = await request.json()
     const purchaseData = purchaseSchema.parse(body)
 
@@ -52,35 +46,23 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     if (!gig) {
       return NextResponse.json({ error: 'Gig not found' }, { status: 404 })
-    }
-
     if (gig.status !== 'ACTIVE') {
       return NextResponse.json({ error: 'This gig is not currently available' }, { status: 400 })
-    }
-
     if (!gig.freelancer.isActive) {
       return NextResponse.json({ error: 'This freelancer is not currently active' }, { status: 400 })
-    }
-
     // Can't purchase your own gig
     if (gig.freelancerId === session.user.id) {
       return NextResponse.json({ error: 'Cannot purchase your own gig' }, { status: 400 })
-    }
-
     // Validate package index
     const packages = gig.packages as any[]
     if (purchaseData.packageIndex >= packages.length) {
       return NextResponse.json({ error: 'Invalid package selected' }, { status: 400 })
-    }
-
     const selectedPackage = packages[purchaseData.packageIndex]
     
     // Calculate total amount (with urgent delivery fee if applicable)
     let totalAmount = selectedPackage.price
     if (purchaseData.urgentDelivery) {
       totalAmount = totalAmount * 1.25 // 25% extra for urgent delivery
-    }
-
     // Check if user has sufficient balance (for now, we'll assume they do)
     // In a real app, you'd check their wallet balance or payment method
 
@@ -211,12 +193,9 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         { error: 'Validation error', details: error.errors },
         { status: 400 }
       )
-    }
-
     console.error('Purchase gig error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
     )
   }
-}

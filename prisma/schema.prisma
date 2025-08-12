@@ -59,6 +59,8 @@ model User {
   totalEarned Float    @default(0)
   totalSpent  Float    @default(0)
   isActive    Boolean  @default(true)
+  notificationSettings Json? // Store notification preferences
+  privacySettings      Json? // Store privacy preferences
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -68,10 +70,14 @@ model User {
   jobApplications  JobApplication[]
   sentMessages     Message[]       @relation("MessageSender")
   receivedMessages Message[]       @relation("MessageReceiver")
-  payments         Payment[]
+  paymentsFrom     Payment[]       @relation("PaymentFrom")
+  paymentsTo       Payment[]       @relation("PaymentTo")
   reviews          Review[]        @relation("ReviewAuthor")
   receivedReviews  Review[]        @relation("ReviewTarget")
   notifications    Notification[]
+  jobViews         JobView[]
+  walletTransactions WalletTransaction[]
+  uploadedFiles    UploadedFile[]
 
   @@map("users")
 }
@@ -103,7 +109,7 @@ model Job {
   isUrgent      Boolean   @default(false)
   attachments   String[]
   tags          String[]
-  viewCount     Int       @default(0)
+  views         Int       @default(0)
   applicantCount Int      @default(0)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -117,6 +123,8 @@ model Job {
   payments     Payment[]
   messages     Message[]
   reviews      Review[]
+  jobViews     JobView[]
+  uploadedFiles UploadedFile[]
 
   @@map("jobs")
 }
@@ -144,6 +152,7 @@ model Gig {
   applications JobApplication[]
   payments     Payment[]
   reviews      Review[]
+  uploadedFiles UploadedFile[]
 
   @@map("gigs")
 }
@@ -205,8 +214,10 @@ model Payment {
   updatedAt     DateTime      @updatedAt
 
   // Relationships
-  payerId  String
-  payer    User @relation(fields: [payerId], references: [id], onDelete: Cascade)
+  fromUserId String
+  fromUser   User @relation("PaymentFrom", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUserId   String
+  toUser     User @relation("PaymentTo", fields: [toUserId], references: [id], onDelete: Cascade)
   jobId    String?
   job      Job? @relation(fields: [jobId], references: [id], onDelete: Cascade)
   gigId    String?
@@ -266,4 +277,68 @@ model PlatformStats {
   updatedAt         DateTime @updatedAt
 
   @@map("platform_stats")
+}
+
+model JobView {
+  id        String   @id @default(cuid())
+  viewedAt  DateTime @default(now())
+  
+  // Relationships
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobId  String
+  job    Job    @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, jobId])
+  @@map("job_views")
+}
+
+enum TransactionType {
+  DEPOSIT
+  WITHDRAWAL
+  EARNING
+  PAYMENT
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+model WalletTransaction {
+  id        String            @id @default(cuid())
+  type      TransactionType
+  amount    Float
+  status    TransactionStatus @default(PENDING)
+  metadata  Json?             // Additional transaction details
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  
+  // Relationships
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("wallet_transactions")
+}
+
+model UploadedFile {
+  id          String   @id @default(cuid())
+  fileName    String
+  fileUrl     String
+  fileSize    Int
+  fileType    String
+  type        String   // 'job-attachment', 'gig-gallery', 'message-file'
+  createdAt   DateTime @default(now())
+  
+  // Relationships
+  uploadedById String
+  uploadedBy   User   @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
+  jobId        String?
+  job          Job?   @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  gigId        String?
+  gig          Gig?   @relation(fields: [gigId], references: [id], onDelete: Cascade)
+  
+  @@map("uploaded_files")
 }

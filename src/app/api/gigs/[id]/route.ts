@@ -24,12 +24,10 @@ const updateGigSchema = z.object({
   status: z.enum(['ACTIVE', 'PAUSED', 'INACTIVE']).optional(),
 })
 
-interface RouteParams {
-  params: { id: string }
-}
 
 // GET /api/gigs/[id] - Get gig details
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions)
     
@@ -99,16 +97,12 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     if (!gig) {
       return NextResponse.json({ error: 'Gig not found' }, { status: 404 })
-    }
-
     // Increment view count (but don't count owner views)
     if (!session || session.user.id !== gig.freelancerId) {
       await prisma.gig.update({
         where: { id: params.id },
         data: { viewCount: { increment: 1 } },
       })
-    }
-
     // Calculate derived fields
     const packages = gig.packages as any[]
     const minPrice = packages.length > 0 ? Math.min(...packages.map(p => p.price)) : 0
@@ -167,17 +161,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       { error: 'Internal server error' },
       { status: 500 }
     )
-  }
-}
-
 // PUT /api/gigs/[id] - Update gig
-export async function PUT(request: NextRequest, { params }: RouteParams) {
+export async function PUT(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions)
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     const body = await request.json()
     const updateData = updateGigSchema.parse(body)
 
@@ -189,15 +179,11 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     if (!gig) {
       return NextResponse.json({ error: 'Gig not found' }, { status: 404 })
-    }
-
     const canUpdate = gig.freelancerId === session.user.id || 
                      PermissionService.canAccessUserManagement(session.user.role)
 
     if (!canUpdate) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
-
     // Validate category if provided
     if (updateData.categoryId) {
       const category = await prisma.category.findUnique({
@@ -210,8 +196,6 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
           { status: 400 }
         )
       }
-    }
-
     // Validate packages if provided
     if (updateData.packages) {
       const packages = updateData.packages
@@ -225,8 +209,6 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
           )
         }
       }
-    }
-
     // Prepare update data
     const dataToUpdate: any = { ...updateData }
     
@@ -249,8 +231,6 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
           )
         }
       }
-    }
-
     const updatedGig = await prisma.gig.update({
       where: { id: params.id },
       data: dataToUpdate,
@@ -303,24 +283,18 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         { error: 'Validation error', details: error.errors },
         { status: 400 }
       )
-    }
-
     console.error('Update gig error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
     )
-  }
-}
-
 // DELETE /api/gigs/[id] - Delete gig
-export async function DELETE(request: NextRequest, { params }: RouteParams) {
+export async function DELETE(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions)
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     // Check if user owns the gig or is admin
     const gig = await prisma.gig.findUnique({
       where: { id: params.id },
@@ -338,39 +312,29 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     if (!gig) {
       return NextResponse.json({ error: 'Gig not found' }, { status: 404 })
-    }
-
     const canDelete = gig.freelancerId === session.user.id || 
                      PermissionService.canAccessUserManagement(session.user.role)
 
     if (!canDelete) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
-
     // Don't allow deletion if gig has payments
     if (gig._count.payments > 0) {
       return NextResponse.json(
         { error: 'Cannot delete gig with existing orders/payments' },
         { status: 400 }
       )
-    }
-
     // Don't allow deletion if gig has pending applications (for gig applications)
     if (gig._count.applications > 0) {
       return NextResponse.json(
         { error: 'Cannot delete gig with pending applications' },
         { status: 400 }
       )
-    }
-
     // Can only delete INACTIVE gigs or set to INACTIVE first
     if (gig.status !== 'INACTIVE') {
       return NextResponse.json(
         { error: 'Can only delete inactive gigs. Set status to INACTIVE first.' },
         { status: 400 }
       )
-    }
-
     await prisma.gig.delete({
       where: { id: params.id },
     })
@@ -383,4 +347,3 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       { status: 500 }
     )
   }
-}

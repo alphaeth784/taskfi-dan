@@ -17,12 +17,10 @@ const updateJobSchema = z.object({
   status: z.enum(['OPEN', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED', 'DISPUTED']).optional(),
 })
 
-interface RouteParams {
-  params: { id: string }
-}
 
 // GET /api/jobs/[id] - Get job details
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions)
     
@@ -106,8 +104,6 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     if (!job) {
       return NextResponse.json({ error: 'Job not found' }, { status: 404 })
-    }
-
     // Increment view count
     await prisma.job.update({
       where: { id: params.id },
@@ -123,8 +119,6 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         estimatedDays: 0,
         attachments: [],
       }))
-    }
-
     return NextResponse.json({ job })
   } catch (error) {
     console.error('Get job error:', error)
@@ -132,17 +126,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       { error: 'Internal server error' },
       { status: 500 }
     )
-  }
-}
-
 // PUT /api/jobs/[id] - Update job
-export async function PUT(request: NextRequest, { params }: RouteParams) {
+export async function PUT(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions)
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     const body = await request.json()
     const updateData = updateJobSchema.parse(body)
 
@@ -154,15 +144,11 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     if (!job) {
       return NextResponse.json({ error: 'Job not found' }, { status: 404 })
-    }
-
     const canUpdate = job.hirerId === session.user.id || 
                      PermissionService.canAccessUserManagement(session.user.role)
 
     if (!canUpdate) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
-
     // Validate category if provided
     if (updateData.categoryId) {
       const category = await prisma.category.findUnique({
@@ -175,8 +161,6 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
           { status: 400 }
         )
       }
-    }
-
     const updatedJob = await prisma.job.update({
       where: { id: params.id },
       data: {
@@ -211,24 +195,18 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         { error: 'Validation error', details: error.errors },
         { status: 400 }
       )
-    }
-
     console.error('Update job error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
     )
-  }
-}
-
 // DELETE /api/jobs/[id] - Delete job
-export async function DELETE(request: NextRequest, { params }: RouteParams) {
+export async function DELETE(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions)
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     // Check if user owns the job or is admin
     const job = await prisma.job.findUnique({
       where: { id: params.id },
@@ -246,31 +224,23 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     if (!job) {
       return NextResponse.json({ error: 'Job not found' }, { status: 404 })
-    }
-
     const canDelete = job.hirerId === session.user.id || 
                      PermissionService.canAccessUserManagement(session.user.role)
 
     if (!canDelete) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
-
     // Don't allow deletion if job has applications or payments
     if (job._count.applications > 0 || job._count.payments > 0) {
       return NextResponse.json(
         { error: 'Cannot delete job with applications or payments' },
         { status: 400 }
       )
-    }
-
     // Only allow deletion if job is still OPEN
     if (job.status !== 'OPEN') {
       return NextResponse.json(
         { error: 'Can only delete open jobs' },
         { status: 400 }
       )
-    }
-
     await prisma.job.delete({
       where: { id: params.id },
     })
@@ -283,4 +253,3 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       { status: 500 }
     )
   }
-}

@@ -20,18 +20,14 @@ const disputeEscrowSchema = z.object({
   evidence: z.array(z.string()).max(10).default([]), // URLs to evidence files
 })
 
-interface RouteParams {
-  params: { id: string }
-}
 
 // POST /api/payments/[id]/escrow - Initialize escrow on blockchain
-export async function POST(request: NextRequest, { params }: RouteParams) {
+export async function POST(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions)
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     const body = await request.json()
     const escrowData = initializeEscrowSchema.parse(body)
 
@@ -72,27 +68,19 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     if (!payment) {
       return NextResponse.json({ error: 'Payment not found' }, { status: 404 })
-    }
-
     // Only payer can initialize escrow
     if (payment.payerId !== session.user.id) {
       return NextResponse.json({ error: 'Only payment owner can initialize escrow' }, { status: 403 })
-    }
-
     // Payment must be in PENDING status
     if (payment.status !== 'PENDING') {
       return NextResponse.json({ 
         error: 'Payment must be in pending status to initialize escrow' 
       }, { status: 400 })
-    }
-
     // Verify amount matches
     if (Math.abs(escrowData.amount - payment.amount) > 0.01) {
       return NextResponse.json({ 
         error: 'Escrow amount does not match payment amount' 
       }, { status: 400 })
-    }
-
     // Update payment with escrow details
     const updatedPayment = await prisma.$transaction(async (tx) => {
       const updated = await tx.payment.update({
@@ -150,8 +138,6 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
             }
           }
         })
-      }
-
       return updated
     })
 
@@ -170,31 +156,23 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         { error: 'Validation error', details: error.errors },
         { status: 400 }
       )
-    }
-
     console.error('Initialize escrow error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
     )
-  }
-}
-
 // PUT /api/payments/[id]/escrow - Release or dispute escrow
-export async function PUT(request: NextRequest, { params }: RouteParams) {
+export async function PUT(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions)
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     const body = await request.json()
     const action = body.action as 'release' | 'dispute'
 
     if (!action || !['release', 'dispute'].includes(action)) {
       return NextResponse.json({ error: 'Action must be either "release" or "dispute"' }, { status: 400 })
-    }
-
     // Find payment and verify it has escrow
     const payment = await prisma.payment.findUnique({
       where: { id: params.id },
@@ -230,16 +208,10 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     if (!payment) {
       return NextResponse.json({ error: 'Payment not found' }, { status: 404 })
-    }
-
     if (payment.status !== 'ESCROW') {
       return NextResponse.json({ error: 'Payment must be in escrow to perform this action' }, { status: 400 })
-    }
-
     if (!payment.escrowAddress) {
       return NextResponse.json({ error: 'Payment does not have an escrow address' }, { status: 400 })
-    }
-
     const freelancerId = payment.job?.freelancerId || payment.gig?.freelancerId
 
     if (action === 'release') {
@@ -250,8 +222,6 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
       if (!canRelease) {
         return NextResponse.json({ error: 'Only payment owner or admin can release escrow' }, { status: 403 })
-      }
-
       const releaseData = releaseEscrowSchema.parse(body)
 
       const updatedPayment = await prisma.$transaction(async (tx) => {
@@ -270,8 +240,6 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
             where: { id: payment.job.id },
             data: { status: 'COMPLETED' }
           })
-        }
-
         // Update freelancer stats
         if (freelancerId) {
           await tx.user.update({
@@ -294,8 +262,6 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
               }
             }
           })
-        }
-
         return updated
       })
 
@@ -308,8 +274,6 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       // Only payer can dispute
       if (payment.payerId !== session.user.id) {
         return NextResponse.json({ error: 'Only payment owner can dispute escrow' }, { status: 403 })
-      }
-
       const disputeData = disputeEscrowSchema.parse(body)
 
       const updatedPayment = await prisma.$transaction(async (tx) => {
@@ -345,8 +309,6 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
               }
             }
           })
-        }
-
         // Notify freelancer
         if (freelancerId) {
           await tx.notification.create({
@@ -361,8 +323,6 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
               }
             }
           })
-        }
-
         return updated
       })
 
@@ -377,24 +337,18 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         { error: 'Validation error', details: error.errors },
         { status: 400 }
       )
-    }
-
     console.error('Escrow action error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
     )
-  }
-}
-
 // GET /api/payments/[id]/escrow - Get escrow details
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions)
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     const payment = await prisma.payment.findUnique({
       where: { id: params.id },
       select: {
@@ -424,8 +378,6 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     if (!payment) {
       return NextResponse.json({ error: 'Payment not found' }, { status: 404 })
-    }
-
     const freelancerId = payment.job?.freelancerId || payment.gig?.freelancerId
 
     // Check access permissions
@@ -436,12 +388,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     if (!canView) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
-
     if (!payment.escrowAddress) {
       return NextResponse.json({ error: 'Payment does not have escrow' }, { status: 400 })
-    }
-
     const escrowInfo = {
       address: payment.escrowAddress,
       amount: payment.amount,
@@ -453,8 +401,6 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       canRelease: payment.payerId === session.user.id || PermissionService.canAccessUserManagement(session.user.role),
       canDispute: payment.payerId === session.user.id && payment.status === 'ESCROW',
       autoReleaseDate: payment.releaseDate,
-    }
-
     return NextResponse.json({ escrow: escrowInfo })
   } catch (error) {
     console.error('Get escrow error:', error)
@@ -463,4 +409,3 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       { status: 500 }
     )
   }
-}

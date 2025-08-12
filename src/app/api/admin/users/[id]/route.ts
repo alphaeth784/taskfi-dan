@@ -15,12 +15,9 @@ const updateUserSchema = z.object({
   categories: z.array(z.string()).max(5).optional(),
 })
 
-interface RouteParams {
-  params: { id: string }
-}
-
 // GET /api/admin/users/[id] - Get detailed user information
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const adminCheck = await requireAdmin()
     if (adminCheck) return adminCheck
@@ -155,8 +152,6 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
-    }
-
     // Calculate additional statistics
     const paymentStats = {
       totalPayments: user.payments.length,
@@ -165,7 +160,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       escrowPayments: user.payments.filter(p => p.status === 'ESCROW').length,
       releasedPayments: user.payments.filter(p => p.status === 'RELEASED').length,
       disputedPayments: user.payments.filter(p => p.status === 'DISPUTED').length,
-    }
+    };
 
     const reviewStats = {
       givenReviews: user.reviews.length,
@@ -176,13 +171,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       averageReceivedRating: user.receivedReviews.length > 0 
         ? user.receivedReviews.reduce((sum, r) => sum + r.rating, 0) / user.receivedReviews.length 
         : user.rating,
-    }
+    };
 
     const activityStats = {
       unreadNotifications: user.notifications.filter(n => !n.isRead).length,
       recentActivity: user.lastActiveAt,
       accountAge: Math.floor((Date.now() - user.createdAt.getTime()) / (1000 * 60 * 60 * 24)), // days
-    }
+    };
 
     return NextResponse.json({
       user,
@@ -192,18 +187,19 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         activity: activityStats,
         counts: user._count,
       },
-    })
+    });
   } catch (error) {
-    console.error('Admin get user error:', error)
+    console.error('Admin get user error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
-    )
+    );
   }
 }
 
 // PUT /api/admin/users/[id] - Update user details
-export async function PUT(request: NextRequest, { params }: RouteParams) {
+export async function PUT(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const adminCheck = await requireAdmin()
     if (adminCheck) return adminCheck
@@ -219,8 +215,6 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     if (!existingUser) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
-    }
-
     // Check for role change restrictions
     if (updateData.role && updateData.role !== existingUser.role) {
       // If changing from ADMIN, ensure there are other admins
@@ -236,8 +230,6 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
           )
         }
       }
-    }
-
     // Check for username uniqueness
     if (updateData.username && updateData.username !== existingUser.username) {
       const existingUsername = await prisma.user.findUnique({
@@ -250,8 +242,6 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
           { status: 400 }
         )
       }
-    }
-
     // Check for email uniqueness
     if (updateData.email && updateData.email !== existingUser.email) {
       const existingEmail = await prisma.user.findUnique({
@@ -264,8 +254,6 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
           { status: 400 }
         )
       }
-    }
-
     // Update user
     const updatedUser = await prisma.user.update({
       where: { id: params.id },
@@ -305,30 +293,30 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     })
 
     // Log admin action
-    console.log(`Admin updated user ${params.id}:`, updateData)
+    console.log(`Admin updated user ${params.id}:`, updateData);
 
     return NextResponse.json({ 
       user: updatedUser,
       message: 'User updated successfully'
-    })
+    });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Validation error', details: error.errors },
         { status: 400 }
-      )
+      );
     }
-
-    console.error('Admin update user error:', error)
+    console.error('Admin update user error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
-    )
+    );
   }
 }
 
 // DELETE /api/admin/users/[id] - Deactivate user (soft delete)
-export async function DELETE(request: NextRequest, { params }: RouteParams) {
+export async function DELETE(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const adminCheck = await requireAdmin()
     if (adminCheck) return adminCheck
@@ -341,8 +329,6 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
-    }
-
     if (user.role === 'ADMIN') {
       // Check if this is the last admin
       const adminCount = await prisma.user.count({
@@ -355,8 +341,6 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
           { status: 400 }
         )
       }
-    }
-
     // Check for active jobs/gigs
     const activeJobs = await prisma.job.count({
       where: {
@@ -393,8 +377,6 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
         },
         { status: 400 }
       )
-    }
-
     // Soft delete - deactivate user
     const deactivatedUser = await prisma.$transaction(async (tx) => {
       // Deactivate user
@@ -454,4 +436,3 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       { status: 500 }
     )
   }
-}

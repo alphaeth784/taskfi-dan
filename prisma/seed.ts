@@ -121,10 +121,10 @@ async function main() {
   // Create admin user
   console.log('Creating admin user...')
   await prisma.user.upsert({
-    where: { walletAddress: 'AdminTaskFi1111111111111111111111111111111' },
+    where: { walletAddress: 'vM6Xvy4XBZyLNWK9kBLgiRf4YaEQsFu2XDiWJ4PRkqJ' },
     update: {},
     create: {
-      walletAddress: 'AdminTaskFi1111111111111111111111111111111',
+      walletAddress: 'vM6Xvy4XBZyLNWK9kBLgiRf4YaEQsFu2XDiWJ4PRkqJ',
       name: 'TaskFi Admin',
       username: 'taskfi_admin',
       bio: 'Platform administrator for TaskFi decentralized marketplace',
