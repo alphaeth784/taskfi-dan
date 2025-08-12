@@ -321,7 +321,10 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+<<<<<<< HEAD
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+=======
+>>>>>>> 086f6fceb3488d1131148f9ebcdfb1e742b995ce
     }
 
     console.error('Create gig error:', error)

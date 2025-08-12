@@ -194,4 +194,5 @@ export async function POST(request: NextRequest, props: { params: Promise<{ id: 
     }
     console.error('Purchase gig error:', error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
 }

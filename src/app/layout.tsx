@@ -1,7 +1,14 @@
+<<<<<<< HEAD
 import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import "./globals.css"
 import ClientProviders from "@/components/providers/ClientProviders"
+=======
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
+import ClientProviders from "@/components/providers/ClientProviders";
+>>>>>>> 086f6fceb3488d1131148f9ebcdfb1e742b995ce
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,7 +30,11 @@ export const metadata: Metadata = {
     description: 'Connect with Web3 freelancers and hirers on Solana. Secure escrow payments, exclusive job assignments, and premium Web3 experience.',
     type: 'website',
   },
+<<<<<<< HEAD
 }
+=======
+};
+>>>>>>> 086f6fceb3488d1131148f9ebcdfb1e742b995ce
 
 export default function RootLayout({
   children,

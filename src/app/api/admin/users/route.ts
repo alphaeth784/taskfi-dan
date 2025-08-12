@@ -229,7 +229,8 @@ export async function PUT(request: NextRequest) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Validation error', details: error.errors },
-    return NextResponse.json({ error: "Internal server error" }, { status: 400 });
+        { status: 400 }
+      );
     }
 
     console.error('Admin bulk update users error:', error)
