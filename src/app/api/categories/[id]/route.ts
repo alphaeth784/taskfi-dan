@@ -77,13 +77,10 @@ export async function GET(request: NextRequest, props: { params: Promise<{ id: s
       return NextResponse.json({ error: 'Category not found' }, { status: 404 })
     }
 
-    return NextResponse.json({ category })
+    return NextResponse.json({ category });
   } catch (error) {
     console.error('Get category error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
@@ -94,8 +91,10 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
     const session = await getServerSession(authOptions)
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     if (!PermissionService.canManageCategories(session.user.role)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
     const body = await request.json()
     const updateData = updateCategorySchema.parse(body)
 
@@ -106,14 +105,13 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
           name: updateData.name,
           NOT: { id: params.id },
         },
-      })
+      });
 
       if (existingCategory) {
-        return NextResponse.json(
-          { error: 'Category name already exists' },
-          { status: 400 }
-        )
+        return NextResponse.json({ error: "Category name already exists" }, { status: 400 });
       }
+    }
+
     const category = await prisma.category.update({
       where: { id: params.id },
       data: updateData,
@@ -122,16 +120,9 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
     return NextResponse.json({ category });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Validation error', details: error.errors },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Invalid data" }, { status: 400 });
     }
-    console.error('Update category error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
@@ -142,8 +133,10 @@ export async function DELETE(request: NextRequest, props: { params: Promise<{ id
     const session = await getServerSession(authOptions)
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     if (!PermissionService.canManageCategories(session.user.role)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
     // Check if category has associated jobs or gigs
     const categoryUsage = await prisma.category.findUnique({
       where: { id: params.id },
@@ -159,24 +152,23 @@ export async function DELETE(request: NextRequest, props: { params: Promise<{ id
 
     if (!categoryUsage) {
       return NextResponse.json({ error: 'Category not found' }, { status: 404 })
+    }
     if (categoryUsage._count.jobs > 0 || categoryUsage._count.gigs > 0) {
       // Soft delete by setting isActive to false
       await prisma.category.update({
         where: { id: params.id },
         data: { isActive: false },
-      })
-      return NextResponse.json({ message: 'Category deactivated successfully' })
+      });
+      return NextResponse.json({ message: 'Category deactivated successfully' });
     } else {
       // Hard delete if no associated data
       await prisma.category.delete({
         where: { id: params.id },
       })
-      return NextResponse.json({ message: 'Category deleted successfully' })
+      return NextResponse.json({ message: 'Category deleted successfully' });
     }
   } catch (error) {
     console.error('Delete category error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
+}

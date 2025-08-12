@@ -38,13 +38,10 @@ export async function GET(request: NextRequest) {
       orderBy: { name: 'asc' },
     })
 
-    return NextResponse.json({ categories })
+    return NextResponse.json({ categories });
   } catch (error) {
-    console.error('Get categories error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    console.error('Get categories error:', error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
@@ -69,28 +66,20 @@ export async function POST(request: NextRequest) {
     })
 
     if (existingCategory) {
-      return NextResponse.json(
-        { error: 'Category name already exists' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: "Internal server error" }, { status: 400 });
     }
 
     const category = await prisma.category.create({
       data: categoryData,
     })
 
-    return NextResponse.json({ category }, { status: 201 })
-  } catch (error) {
+    return NextResponse.json({ category }, { status: 201 });
+    } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Validation error', details: error.errors },
-        { status: 400 }
-      )
+    return NextResponse.json({ error: "Internal server error" }, { status: 400 });
     }
 
     console.error('Create category error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
+}

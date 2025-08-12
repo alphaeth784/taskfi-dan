@@ -97,12 +97,15 @@ export async function GET(request: NextRequest, props: { params: Promise<{ id: s
 
     if (!gig) {
       return NextResponse.json({ error: 'Gig not found' }, { status: 404 })
+    }
+
     // Increment view count (but don't count owner views)
     if (!session || session.user.id !== gig.freelancerId) {
       await prisma.gig.update({
         where: { id: params.id },
         data: { viewCount: { increment: 1 } },
       })
+    }
     // Calculate derived fields
     const packages = gig.packages as any[]
     const minPrice = packages.length > 0 ? Math.min(...packages.map(p => p.price)) : 0
@@ -141,7 +144,7 @@ export async function GET(request: NextRequest, props: { params: Promise<{ id: s
         ...relatedGig,
         minPrice: relatedPackages.length > 0 ? Math.min(...relatedPackages.map(p => p.price)) : 0,
       }
-    })
+    });
 
     return NextResponse.json({ 
       gig: {
@@ -154,13 +157,13 @@ export async function GET(request: NextRequest, props: { params: Promise<{ id: s
         totalOrders: gig._count.payments,
         relatedGigs: processedRelatedGigs,
       }
-    })
+    });
   } catch (error) {
     console.error('Get gig error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
+
 // PUT /api/gigs/[id] - Update gig
 export async function PUT(request: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -168,6 +171,8 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
     const session = await getServerSession(authOptions)
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const body = await request.json()
     const updateData = updateGigSchema.parse(body)
 
@@ -179,11 +184,15 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
 
     if (!gig) {
       return NextResponse.json({ error: 'Gig not found' }, { status: 404 })
+    }
+
     const canUpdate = gig.freelancerId === session.user.id || 
                      PermissionService.canAccessUserManagement(session.user.role)
 
     if (!canUpdate) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
     // Validate category if provided
     if (updateData.categoryId) {
       const category = await prisma.category.findUnique({
@@ -191,11 +200,10 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
       })
 
       if (!category || !category.isActive) {
-        return NextResponse.json(
-          { error: 'Invalid category' },
-          { status: 400 }
-        )
+        return NextResponse.json({ error: "Internal server error" }, { status: 400 });
       }
+    }
+
     // Validate packages if provided
     if (updateData.packages) {
       const packages = updateData.packages
@@ -203,12 +211,11 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
       // Ensure packages are in ascending price order
       for (let i = 1; i < packages.length; i++) {
         if (packages[i].price <= packages[i-1].price) {
-          return NextResponse.json(
-            { error: 'Package prices must be in ascending order' },
-            { status: 400 }
-          )
+          return NextResponse.json({ error: "Internal server error" }, { status: 400 });
         }
       }
+    }
+
     // Prepare update data
     const dataToUpdate: any = { ...updateData }
     
@@ -225,12 +232,11 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
         })
 
         if (activeGigsCount >= 10) {
-          return NextResponse.json(
-            { error: 'Maximum of 10 active gigs allowed' },
-            { status: 400 }
-          )
+          return NextResponse.json({ error: "Internal server error" }, { status: 400 });
         }
       }
+    }
+
     const updatedGig = await prisma.gig.update({
       where: { id: params.id },
       data: dataToUpdate,
@@ -276,18 +282,15 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
         reviewCount: updatedGig._count.reviews,
         totalOrders: updatedGig._count.payments,
       }
-    })
+    });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Validation error', details: error.errors },
-        { status: 400 }
-      )
-    console.error('Update gig error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+      return NextResponse.json({ error: "Invalid input" }, { status: 400 });
+    }
+    console.error('Update gig error:', error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
 // DELETE /api/gigs/[id] - Delete gig
 export async function DELETE(request: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -295,6 +298,8 @@ export async function DELETE(request: NextRequest, props: { params: Promise<{ id
     const session = await getServerSession(authOptions)
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     // Check if user owns the gig or is admin
     const gig = await prisma.gig.findUnique({
       where: { id: params.id },
@@ -312,38 +317,37 @@ export async function DELETE(request: NextRequest, props: { params: Promise<{ id
 
     if (!gig) {
       return NextResponse.json({ error: 'Gig not found' }, { status: 404 })
+    }
+
     const canDelete = gig.freelancerId === session.user.id || 
                      PermissionService.canAccessUserManagement(session.user.role)
 
     if (!canDelete) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
     // Don't allow deletion if gig has payments
     if (gig._count.payments > 0) {
-      return NextResponse.json(
-        { error: 'Cannot delete gig with existing orders/payments' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: "Cannot delete gig with existing payments" }, { status: 400 });
+    }
+
     // Don't allow deletion if gig has pending applications (for gig applications)
     if (gig._count.applications > 0) {
-      return NextResponse.json(
-        { error: 'Cannot delete gig with pending applications' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: "Cannot delete gig with pending applications" }, { status: 400 });
+    }
+
     // Can only delete INACTIVE gigs or set to INACTIVE first
     if (gig.status !== 'INACTIVE') {
-      return NextResponse.json(
-        { error: 'Can only delete inactive gigs. Set status to INACTIVE first.' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: "Can only delete inactive gigs" }, { status: 400 });
+    }
+
     await prisma.gig.delete({
       where: { id: params.id },
     })
 
-    return NextResponse.json({ message: 'Gig deleted successfully' })
+    return NextResponse.json({ message: 'Gig deleted successfully' });
   } catch (error) {
     console.error('Delete gig error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
+}

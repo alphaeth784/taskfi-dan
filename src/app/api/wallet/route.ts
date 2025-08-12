@@ -62,15 +62,15 @@ export async function GET(request: NextRequest) {
           walletBalance += transaction.amount
         }
       }
-    })
+    });
 
     return NextResponse.json({
       wallet: {
         ...user,
-        walletBalance: Math.max(0, walletBalance)
+        walletBalance: Math.max(0, walletBalance),
       }
-    })
-  } catch (error) {
+    });
+    } catch (error) {
     console.error('Wallet fetch error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
@@ -143,8 +143,11 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    return NextResponse.json({ error: 'Invalid transaction type' }, { status: 400 })
-  } catch (error) {
+    return NextResponse.json({ error: 'Invalid transaction type' }, { status: 400 });
+    } catch (error) {
     console.error('Wallet transaction error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
+
+
+}

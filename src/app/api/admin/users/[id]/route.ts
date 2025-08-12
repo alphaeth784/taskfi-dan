@@ -151,7 +151,9 @@ export async function GET(request: NextRequest, props: { params: Promise<{ id: s
     })
 
     if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
     // Calculate additional statistics
     const paymentStats = {
       totalPayments: user.payments.length,
@@ -188,12 +190,9 @@ export async function GET(request: NextRequest, props: { params: Promise<{ id: s
         counts: user._count,
       },
     });
-  } catch (error) {
+    } catch (error) {
     console.error('Admin get user error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
@@ -215,6 +214,8 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
 
     if (!existingUser) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    }
+
     // Check for role change restrictions
     if (updateData.role && updateData.role !== existingUser.role) {
       // If changing from ADMIN, ensure there are other admins
@@ -224,12 +225,11 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
         })
 
         if (adminCount === 0) {
-          return NextResponse.json(
-            { error: 'Cannot remove admin role from the last administrator' },
-            { status: 400 }
-          )
+          return NextResponse.json({ error: "Internal server error" }, { status: 400 });
         }
       }
+    }
+
     // Check for username uniqueness
     if (updateData.username && updateData.username !== existingUser.username) {
       const existingUsername = await prisma.user.findUnique({
@@ -237,11 +237,10 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
       })
 
       if (existingUsername) {
-        return NextResponse.json(
-          { error: 'Username already exists' },
-          { status: 400 }
-        )
+        return NextResponse.json({ error: "Internal server error" }, { status: 400 });
       }
+    }
+
     // Check for email uniqueness
     if (updateData.email && updateData.email !== existingUser.email) {
       const existingEmail = await prisma.user.findUnique({
@@ -249,11 +248,10 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
       })
 
       if (existingEmail) {
-        return NextResponse.json(
-          { error: 'Email already exists' },
-          { status: 400 }
-        )
+        return NextResponse.json({ error: "Internal server error" }, { status: 400 });
       }
+    }
+
     // Update user
     const updatedUser = await prisma.user.update({
       where: { id: params.id },
@@ -290,7 +288,7 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
           updatedAt: new Date().toISOString(),
         },
       },
-    })
+    });
 
     // Log admin action
     console.log(`Admin updated user ${params.id}:`, updateData);
@@ -301,16 +299,9 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Validation error', details: error.errors },
-        { status: 400 }
-      );
+    return NextResponse.json({ error: "Internal server error" }, { status: 400 });
     }
-    console.error('Admin update user error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
@@ -329,6 +320,8 @@ export async function DELETE(request: NextRequest, props: { params: Promise<{ id
 
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    }
+
     if (user.role === 'ADMIN') {
       // Check if this is the last admin
       const adminCount = await prisma.user.count({
@@ -336,11 +329,10 @@ export async function DELETE(request: NextRequest, props: { params: Promise<{ id
       })
 
       if (adminCount === 0) {
-        return NextResponse.json(
-          { error: 'Cannot deactivate the last administrator' },
-          { status: 400 }
-        )
+        return NextResponse.json({ error: "Internal server error" }, { status: 400 });
       }
+    }
+
     // Check for active jobs/gigs
     const activeJobs = await prisma.job.count({
       where: {
@@ -375,8 +367,9 @@ export async function DELETE(request: NextRequest, props: { params: Promise<{ id
             activePayments,
           }
         },
-        { status: 400 }
-      )
+        return NextResponse.json({ error: "Internal server error" }, { status: 400 });
+    }
+
     // Soft delete - deactivate user
     const deactivatedUser = await prisma.$transaction(async (tx) => {
       // Deactivate user
@@ -428,11 +421,9 @@ export async function DELETE(request: NextRequest, props: { params: Promise<{ id
     return NextResponse.json({
       message: 'User deactivated successfully',
       user: deactivatedUser,
-    })
+    });
   } catch (error) {
     console.error('Admin deactivate user error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
+}

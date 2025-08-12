@@ -63,10 +63,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error fetching notifications:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 
 export async function PATCH(request: NextRequest) {
@@ -126,14 +123,8 @@ export async function PATCH(request: NextRequest) {
       }
     }
 
-    return NextResponse.json(
-      { error: 'Invalid action or missing parameters' },
-      { status: 400 }
-    );
-  } catch (error) {
-    console.error('Error updating notifications:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
+
+
+}

@@ -19,6 +19,7 @@ export async function GET(request: NextRequest, props: { params: Promise<{ id: s
     const session = await getServerSession(authOptions)
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     const application = await prisma.jobApplication.findFirst({
       where: { 
         id: params.applicationId,
@@ -72,20 +73,17 @@ export async function GET(request: NextRequest, props: { params: Promise<{ id: s
     // Hide sensitive data for non-owners
     if (application.job.hirerId !== session.user.id && !PermissionService.canAccessUserManagement(session.user.role)) {
       const { coverLetter, proposedBudget, estimatedDays, attachments, ...publicData } = application
-      return NextResponse.json({ application: publicData })
-    return NextResponse.json({ application })
+      return NextResponse.json({ application });
   } catch (error) {
     console.error('Get application error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
-// PUT /api/jobs/[id]/applications/[applicationId] - Update application (freelancer only)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+// PUT /api/jobs/[id]/applications/[applicationId] - Update application (freelancer only);
 export async function PUT(request: NextRequest, props: { params: Promise<{ id: string; applicationId: string }> }) {
   const params = await props.params;
   try {
     const session = await getServerSession(authOptions)
     if (!session) {
+    try {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     const body = await request.json()
     const updateData = updateApplicationSchema.parse(body)
@@ -144,21 +142,15 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
       }
     })
 
-    return NextResponse.json({ application: updatedApplication })
+    return NextResponse.json({ application: updatedApplication });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Validation error', details: error.errors },
-        { status: 400 }
-      )
-    console.error('Update application error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Internal server error" }, { status: 400 });
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
 // DELETE /api/jobs/[id]/applications/[applicationId] - Withdraw application
 export async function DELETE(request: NextRequest, props: { params: Promise<{ id: string; applicationId: string }> }) {
   const params = await props.params;
+    try {
   try {
     const session = await getServerSession(authOptions)
     if (!session) {
@@ -218,11 +210,11 @@ export async function DELETE(request: NextRequest, props: { params: Promise<{ id
       }
     })
 
-    return NextResponse.json({ message: 'Application withdrawn successfully' })
+    return NextResponse.json({ message: 'Application withdrawn successfully' });
   } catch (error) {
     console.error('Delete application error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
+
+
+}

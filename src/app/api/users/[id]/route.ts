@@ -9,6 +9,7 @@ export async function GET(request: NextRequest, props: { params: Promise<{ id: s
   const params = await props.params;
   try {
     const session = await getServerSession(authOptions)
+    try {
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     const user = await prisma.user.findUnique({
@@ -86,40 +87,31 @@ export async function GET(request: NextRequest, props: { params: Promise<{ id: s
         receivedReviews: user.receivedReviews,
         _count: user._count,
       }
-      return NextResponse.json({ user: publicProfile })
-    return NextResponse.json({ user })
+      return NextResponse.json({ user });
   } catch (error) {
     console.error('Get user profile error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
-// DELETE /api/users/[id] - Delete user (admin only)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+// DELETE /api/users/[id] - Delete user (admin only);
 export async function DELETE(request: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   try {
+    try {
     const session = await getServerSession(authOptions)
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     if (!PermissionService.canAccessUserManagement(session.user.role)) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    // Don't allow deleting own account
-    if (session.user.id === params.id) {
-      return NextResponse.json(
-        { error: 'Cannot delete own account' },
-        { status: 400 }
-      )
+    return NextResponse.json({ error: "Internal server error" }, { status: 400 });
     // Soft delete by setting isActive to false
     await prisma.user.update({
       where: { id: params.id },
       data: { isActive: false },
     })
 
-    return NextResponse.json({ message: 'User deleted successfully' })
+    return NextResponse.json({ message: 'User deleted successfully' });
   } catch (error) {
     console.error('Delete user error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
+
+
+}

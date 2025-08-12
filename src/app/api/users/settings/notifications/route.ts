@@ -38,12 +38,9 @@ export async function GET(request: NextRequest) {
     const settings = user.notificationSettings || defaultSettings;
 
     return NextResponse.json(settings);
-  } catch (error) {
+    } catch (error) {
     console.error('Error fetching notification settings:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 
 export async function PUT(request: NextRequest) {
@@ -73,10 +70,7 @@ export async function PUT(request: NextRequest) {
       typeof paymentAlerts !== 'boolean' ||
       typeof messageAlerts !== 'boolean'
     ) {
-      return NextResponse.json(
-        { error: 'Invalid notification settings format' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Internal server error" }, { status: 400 });
     }
 
     const updatedUser = await prisma.user.update({
@@ -104,8 +98,8 @@ export async function PUT(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error updating notification settings:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
+
+
+}

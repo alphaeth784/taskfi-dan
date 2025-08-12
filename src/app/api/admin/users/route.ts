@@ -155,20 +155,14 @@ export async function GET(request: NextRequest) {
         }, {} as Record<string, number>),
         statusBreakdown: statusStats,
       },
-    })
-  } catch (error) {
+    });
+    } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Validation error', details: error.errors },
-        { status: 400 }
-      )
+    return NextResponse.json({ error: "Internal server error" }, { status: 400 });
     }
 
-    console.error('Admin get users error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    console.error('Admin get users error:', error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
@@ -182,17 +176,11 @@ export async function PUT(request: NextRequest) {
     const { userIds, updates } = body
 
     if (!Array.isArray(userIds) || userIds.length === 0) {
-      return NextResponse.json(
-        { error: 'userIds array is required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: "Internal server error" }, { status: 400 });
     }
 
     if (userIds.length > 100) {
-      return NextResponse.json(
-        { error: 'Maximum 100 users can be updated at once' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: "Internal server error" }, { status: 400 });
     }
 
     const updateData = updateUserSchema.parse(updates)
@@ -204,10 +192,7 @@ export async function PUT(request: NextRequest) {
     })
 
     if (existingUsers.length !== userIds.length) {
-      return NextResponse.json(
-        { error: 'Some users were not found' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: "Internal server error" }, { status: 404 });
     }
 
     // Don't allow changing admin roles unless there are other admins
@@ -222,10 +207,7 @@ export async function PUT(request: NextRequest) {
         })
 
         if (remainingAdmins === 0) {
-          return NextResponse.json(
-            { error: 'Cannot remove admin role from all administrators' },
-            { status: 400 }
-          )
+          return NextResponse.json({ error: "Internal server error" }, { status: 400 });
         }
       }
     }
@@ -242,18 +224,15 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({
       message: `Successfully updated ${updatedUsers.count} users`,
       updatedCount: updatedUsers.count,
-    })
-  } catch (error) {
+    });
+    } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Validation error', details: error.errors },
-        { status: 400 }
-      )
+    return NextResponse.json({ error: "Internal server error" }, { status: 400 });
     }
 
     console.error('Admin bulk update users error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
+}

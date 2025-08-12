@@ -18,18 +18,15 @@ export async function POST(request: NextRequest) {
       username,
       available: isAvailable,
       message: isAvailable ? 'Username is available' : 'Username is already taken'
-    })
+    });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Invalid username format', details: error.errors },
-        { status: 400 }
-      )
+    return NextResponse.json({ error: "Internal server error" }, { status: 400 });
     }
 
     console.error('Check username error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
+
+
+}

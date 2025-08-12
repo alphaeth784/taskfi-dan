@@ -37,12 +37,9 @@ export async function GET(request: NextRequest) {
     const settings = user.privacySettings || defaultSettings;
 
     return NextResponse.json(settings);
-  } catch (error) {
+    } catch (error) {
     console.error('Error fetching privacy settings:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 
 export async function PUT(request: NextRequest) {
@@ -67,24 +64,15 @@ export async function PUT(request: NextRequest) {
     const validVisibilityOptions = ['public', 'private', 'connections'];
     
     if (profileVisibility && !validVisibilityOptions.includes(profileVisibility)) {
-      return NextResponse.json(
-        { error: 'Invalid profile visibility option' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Internal server error" }, { status: 400 });
     }
 
     if (earningsVisibility && !['public', 'private'].includes(earningsVisibility)) {
-      return NextResponse.json(
-        { error: 'Invalid earnings visibility option' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Internal server error" }, { status: 400 });
     }
 
     if (reviewsVisibility && !validVisibilityOptions.includes(reviewsVisibility)) {
-      return NextResponse.json(
-        { error: 'Invalid reviews visibility option' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Internal server error" }, { status: 400 });
     }
 
     const updatedUser = await prisma.user.update({
@@ -111,8 +99,8 @@ export async function PUT(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error updating privacy settings:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
+
+
+}

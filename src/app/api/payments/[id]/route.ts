@@ -18,6 +18,7 @@ export async function GET(request: NextRequest, props: { params: Promise<{ id: s
   const params = await props.params;
   try {
     const session = await getServerSession(authOptions)
+    try {
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     const payment = await prisma.payment.findUnique({
@@ -108,19 +109,17 @@ export async function GET(request: NextRequest, props: { params: Promise<{ id: s
         ...payment,
         escrowInfo
       }
-    })
-  } catch (error) {
+    });
+      } catch (error) {
     console.error('Get payment error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
-// PUT /api/payments/[id] - Update payment status (release, dispute, etc.)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+// PUT /api/payments/[id] - Update payment status (release, dispute, etc.);
 export async function PUT(request: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   try {
     const session = await getServerSession(authOptions)
     if (!session) {
+    try {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     const body = await request.json()
     const updateData = updatePaymentSchema.parse(body)
@@ -166,10 +165,7 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
             PermissionService.canAccessUserManagement(session.user.role)
           
           if (payment.status !== 'ESCROW') {
-            return NextResponse.json(
-              { error: 'Can only release funds from escrow' },
-              { status: 400 }
-            )
+            return NextResponse.json({ error: "Internal server error" }, { status: 400 });
           updatePayload = {
             status: 'RELEASED',
             releaseDate: new Date(),
@@ -181,15 +177,7 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
           canUpdate = payment.payerId === session.user.id
 
           if (payment.status !== 'ESCROW') {
-            return NextResponse.json(
-              { error: 'Can only dispute payments in escrow' },
-              { status: 400 }
-            )
-          if (!updateData.disputeReason) {
-            return NextResponse.json(
-              { error: 'Dispute reason is required' },
-              { status: 400 }
-            )
+    return NextResponse.json({ error: "Internal server error" }, { status: 400 });
           updatePayload = {
             status: 'DISPUTED',
             disputeReason: updateData.disputeReason,
@@ -201,10 +189,7 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
           canUpdate = PermissionService.canAccessUserManagement(session.user.role)
 
           if (payment.status !== 'DISPUTED') {
-            return NextResponse.json(
-              { error: 'Can only refund disputed payments' },
-              { status: 400 }
-            )
+            return NextResponse.json({ error: "Internal server error" }, { status: 400 });
           updatePayload = {
             status: 'REFUNDED',
             releaseDate: new Date(),
@@ -216,10 +201,7 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
           canUpdate = PermissionService.canAccessUserManagement(session.user.role)
 
           if (payment.status !== 'PENDING') {
-            return NextResponse.json(
-              { error: 'Can only move pending payments to escrow' },
-              { status: 400 }
-            )
+            return NextResponse.json({ error: "Internal server error" }, { status: 400 });
           updatePayload = {
             status: 'ESCROW',
             escrowAddress: updateData.escrowAddress,
@@ -228,10 +210,7 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
           break
 
         default:
-          return NextResponse.json(
-            { error: 'Invalid status transition' },
-            { status: 400 }
-          )
+          return NextResponse.json({ error: "Internal server error" }, { status: 400 });
       }
     } else {
       // Admin can update escrow details without status change
@@ -385,16 +364,15 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
       return updated
     })
 
-    return NextResponse.json({ payment: updatedPayment })
+    return NextResponse.json({ payment: updatedPayment });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Validation error', details: error.errors },
-        { status: 400 }
-      )
+    return NextResponse.json({ error: "Internal server error" }, { status: 400 });
     console.error('Update payment error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
+
+
+}

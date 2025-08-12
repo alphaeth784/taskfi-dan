@@ -214,21 +214,16 @@ export async function GET(request: NextRequest) {
         total: filteredGigs.length,
         pages: Math.ceil(filteredGigs.length / limit),
       },
-    })
-  } catch (error) {
+    });
+    } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Validation error', details: error.errors },
-        { status: 400 }
-      )
+    return NextResponse.json({ error: "Internal server error" }, { status: 400 });
     }
 
     console.error('Get gigs error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
+}
 
 // POST /api/gigs - Create new gig (freelancer only)
 export async function POST(request: NextRequest) {
@@ -251,10 +246,7 @@ export async function POST(request: NextRequest) {
     })
 
     if (!category || !category.isActive) {
-      return NextResponse.json(
-        { error: 'Invalid category' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: "Internal server error" }, { status: 400 });
     }
 
     // Check freelancer's gig limits (max 10 active gigs)
@@ -266,10 +258,7 @@ export async function POST(request: NextRequest) {
     })
 
     if (activeGigsCount >= 10) {
-      return NextResponse.json(
-        { error: 'Maximum of 10 active gigs allowed' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: "Internal server error" }, { status: 400 });
     }
 
     // Validate packages structure
@@ -279,10 +268,7 @@ export async function POST(request: NextRequest) {
     // Ensure packages are in ascending price order
     for (let i = 1; i < packages.length; i++) {
       if (packages[i].price <= packages[i-1].price) {
-        return NextResponse.json(
-          { error: 'Package prices must be in ascending order' },
-          { status: 400 }
-        )
+        return NextResponse.json({ error: "Internal server error" }, { status: 400 });
       }
     }
 
@@ -327,18 +313,15 @@ export async function POST(request: NextRequest) {
         reviewCount: 0,
         totalOrders: 0,
       }
-    }, { status: 201 })
-  } catch (error) {
+    }, { status: 201 });
+    } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Validation error', details: error.errors },
-        { status: 400 }
-      )
+    return NextResponse.json({ error: "Internal server error" }, { status: 400 });
     }
 
     console.error('Create gig error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
+}

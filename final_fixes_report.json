@@ -1,0 +1,346 @@
+[
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/admin/dashboard/route.ts",
+    "fixes": [
+      "Added try block for orphaned catch at line 323"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/admin/users/route.ts",
+    "fixes": [
+      "Added try block for orphaned catch at line 159",
+      "Added try block for orphaned catch at line 233"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/admin/users/route.ts",
+    "fixes": [
+      "Removed orphaned closing at line 162",
+      "Removed orphaned closing at line 181",
+      "Removed orphaned closing at line 186",
+      "Removed orphaned closing at line 199",
+      "Removed orphaned closing at line 215",
+      "Removed orphaned closing at line 238"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/admin/users/[id]/route.ts",
+    "fixes": [
+      "Added try block for orphaned catch at line 193",
+      "Added try block for orphaned catch at line 303",
+      "Added try block for orphaned catch at line 430"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/admin/users/[id]/route.ts",
+    "fixes": [
+      "Removed orphaned closing at line 229",
+      "Removed orphaned closing at line 242",
+      "Removed orphaned closing at line 254",
+      "Removed orphaned closing at line 336",
+      "Removed orphaned closing at line 375"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/analytics/route.ts",
+    "fixes": [
+      "Added try block for orphaned catch at line 44"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/categories/route.ts",
+    "fixes": [
+      "Added try block for orphaned catch at line 42",
+      "Added try block for orphaned catch at line 78"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/categories/route.ts",
+    "fixes": [
+      "Removed orphaned closing at line 70",
+      "Removed orphaned closing at line 81"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/categories/[id]/route.ts",
+    "fixes": [
+      "Added try block for orphaned catch at line 81",
+      "Added try block for orphaned catch at line 120",
+      "Added try block for orphaned catch at line 166"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/categories/[id]/route.ts",
+    "fixes": [
+      "Removed orphaned closing at line 84"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/gigs/route.ts",
+    "fixes": [
+      "Added try block for orphaned catch at line 218",
+      "Added try block for orphaned catch at line 321"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/gigs/route.ts",
+    "fixes": [
+      "Removed orphaned closing at line 221",
+      "Removed orphaned closing at line 226",
+      "Removed orphaned closing at line 252",
+      "Removed orphaned closing at line 275",
+      "Removed orphaned closing at line 326"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/gigs/[id]/route.ts",
+    "fixes": [
+      "Added try block for orphaned catch at line 158",
+      "Added try block for orphaned catch at line 274",
+      "Added try block for orphaned catch at line 325"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/gigs/[id]/route.ts",
+    "fixes": [
+      "Removed orphaned closing at line 205",
+      "Removed orphaned closing at line 225",
+      "Removed orphaned closing at line 277",
+      "Removed orphaned closing at line 311",
+      "Removed orphaned closing at line 315",
+      "Removed orphaned closing at line 319"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/gigs/[id]/order/route.ts",
+    "fixes": [
+      "Added try block for orphaned catch at line 152"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/gigs/[id]/purchase/route.ts",
+    "fixes": [
+      "Added try block for orphaned catch at line 190"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/jobs/route.ts",
+    "fixes": [
+      "Added try block for orphaned catch at line 142",
+      "Added try block for orphaned catch at line 206"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/jobs/route.ts",
+    "fixes": [
+      "Removed orphaned closing at line 145",
+      "Removed orphaned closing at line 150",
+      "Removed orphaned closing at line 175",
+      "Removed orphaned closing at line 211"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/jobs/[id]/route.ts",
+    "fixes": [
+      "Added try block for orphaned catch at line 123",
+      "Added try block for orphaned catch at line 187",
+      "Added try block for orphaned catch at line 234"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/jobs/[id]/route.ts",
+    "fixes": [
+      "Removed orphaned closing at line 157",
+      "Removed orphaned closing at line 190",
+      "Removed orphaned closing at line 224",
+      "Removed orphaned closing at line 228"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/jobs/[id]/applications/route.ts",
+    "fixes": [
+      "Added try block for orphaned catch at line 111",
+      "Added try block for orphaned catch at line 224",
+      "Added try block for orphaned catch at line 429"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/jobs/[id]/applications/route.ts",
+    "fixes": [
+      "Removed orphaned closing at line 227",
+      "Removed orphaned closing at line 229",
+      "Removed orphaned closing at line 434"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/jobs/[id]/applications/[applicationId]/route.ts",
+    "fixes": [
+      "Added try block for orphaned catch at line 76",
+      "Added try block for orphaned catch at line 145",
+      "Added try block for orphaned catch at line 213"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/jobs/[id]/applications/[applicationId]/route.ts",
+    "fixes": [
+      "Removed orphaned closing at line 79",
+      "Removed orphaned closing at line 148"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/jobs/[id]/messages/route.ts",
+    "fixes": [
+      "Added try block for orphaned catch at line 109",
+      "Added try block for orphaned catch at line 214"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/jobs/[id]/view/route.ts",
+    "fixes": [
+      "Added try block for orphaned catch at line 86"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/notifications/route.ts",
+    "fixes": [
+      "Added try block for orphaned catch at line 64"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/payments/route.ts",
+    "fixes": [
+      "Added try block for orphaned catch at line 134",
+      "Added try block for orphaned catch at line 257"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/payments/route.ts",
+    "fixes": [
+      "Removed orphaned closing at line 137",
+      "Removed orphaned closing at line 142",
+      "Removed orphaned closing at line 159",
+      "Removed orphaned closing at line 164",
+      "Removed orphaned closing at line 262"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/payments/[id]/route.ts",
+    "fixes": [
+      "Added try block for orphaned catch at line 112",
+      "Added try block for orphaned catch at line 372"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/payments/[id]/route.ts",
+    "fixes": [
+      "Removed orphaned closing at line 115",
+      "Removed orphaned closing at line 168",
+      "Removed orphaned closing at line 181",
+      "Removed orphaned closing at line 194",
+      "Removed orphaned closing at line 207",
+      "Removed orphaned closing at line 217",
+      "Removed orphaned closing at line 377"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/payments/[id]/escrow/route.ts",
+    "fixes": [
+      "Added try block for orphaned catch at line 153",
+      "Added try block for orphaned catch at line 328",
+      "Added try block for orphaned catch at line 396"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/payments/[id]/escrow/route.ts",
+    "fixes": [
+      "Removed orphaned closing at line 156",
+      "Removed orphaned closing at line 333"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/upload/route.ts",
+    "fixes": [
+      "Added try block for orphaned catch at line 138",
+      "Added try block for orphaned catch at line 209"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/users/route.ts",
+    "fixes": [
+      "Added try block for orphaned catch at line 114",
+      "Added missing semicolon at line 143",
+      "Added try block for orphaned catch at line 144",
+      "Added try block for orphaned catch at line 169"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/users/route.ts",
+    "fixes": [
+      "Removed orphaned closing at line 117",
+      "Removed orphaned closing at line 130",
+      "Removed orphaned closing at line 137",
+      "Removed orphaned closing at line 147",
+      "Removed orphaned closing at line 152",
+      "Removed orphaned closing at line 174"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/users/[id]/route.ts",
+    "fixes": [
+      "Added try block for orphaned catch at line 90",
+      "Added try block for orphaned catch at line 111"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/users/[id]/route.ts",
+    "fixes": [
+      "Removed orphaned closing at line 93",
+      "Removed orphaned closing at line 103"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/users/check-username/route.ts",
+    "fixes": [
+      "Added try block for orphaned catch at line 22"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/users/check-username/route.ts",
+    "fixes": [
+      "Removed orphaned closing at line 25"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/users/settings/notifications/route.ts",
+    "fixes": [
+      "Added try block for orphaned catch at line 41",
+      "Added try block for orphaned catch at line 99"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/users/settings/privacy/route.ts",
+    "fixes": [
+      "Added try block for orphaned catch at line 40",
+      "Added try block for orphaned catch at line 100"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/users/upload/avatar/route.ts",
+    "fixes": [
+      "Added try block for orphaned catch at line 77"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/wallet/route.ts",
+    "fixes": [
+      "Added try block for orphaned catch at line 73",
+      "Added try block for orphaned catch at line 147"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/wallet/withdraw/route.ts",
+    "fixes": [
+      "Added try block for orphaned catch at line 100"
+    ]
+  }
+]

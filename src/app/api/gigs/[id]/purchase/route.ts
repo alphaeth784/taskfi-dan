@@ -23,6 +23,7 @@ export async function POST(request: NextRequest, props: { params: Promise<{ id: 
     // Only hirers and verified users can purchase gigs
     if (session.user.role !== 'HIRER' && session.user.role !== 'ADMIN') {
       return NextResponse.json({ error: 'Only hirers can purchase gigs' }, { status: 403 })
+    try {
     const body = await request.json()
     const purchaseData = purchaseSchema.parse(body)
 
@@ -179,23 +180,18 @@ export async function POST(request: NextRequest, props: { params: Promise<{ id: 
       })
 
       return payment
-    })
+    });
 
     return NextResponse.json({ 
       payment,
       message: 'Gig purchased successfully! Funds are in escrow and will be released upon delivery.',
       orderId: payment.id,
       expectedDelivery,
-    }, { status: 201 })
+    }, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Validation error', details: error.errors },
-        { status: 400 }
-      )
-    console.error('Purchase gig error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
-  }
+      return NextResponse.json({ error: "Invalid purchase data" }, { status: 400 });
+    }
+    console.error('Purchase gig error:', error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+}

@@ -138,20 +138,14 @@ export async function GET(request: NextRequest) {
         total,
         pages: Math.ceil(total / limit),
       },
-    })
-  } catch (error) {
+    });
+    } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Validation error', details: error.errors },
-        { status: 400 }
-      )
+    return NextResponse.json({ error: "Internal server error" }, { status: 400 });
     }
 
     console.error('Get jobs error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 
 // POST /api/jobs - Create new job (hirer only)
@@ -175,10 +169,7 @@ export async function POST(request: NextRequest) {
     })
 
     if (!category || !category.isActive) {
-      return NextResponse.json(
-        { error: 'Invalid category' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: "Internal server error" }, { status: 400 });
     }
 
     const job = await prisma.job.create({
@@ -208,18 +199,17 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    return NextResponse.json({ job }, { status: 201 })
-  } catch (error) {
+    return NextResponse.json({ job }, { status: 201 });
+    } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Validation error', details: error.errors },
-        { status: 400 }
-      )
+    return NextResponse.json({ error: "Internal server error" }, { status: 400 });
     }
 
     console.error('Create job error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
+
+
+}

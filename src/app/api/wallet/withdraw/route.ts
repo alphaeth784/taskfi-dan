@@ -17,17 +17,11 @@ export async function POST(request: NextRequest) {
 
     // Validate input
     if (!amount || amount <= 0) {
-      return NextResponse.json(
-        { error: 'Invalid withdrawal amount' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Internal server error" }, { status: 400 });
     }
 
     if (!toAddress) {
-      return NextResponse.json(
-        { error: 'Withdrawal address is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Internal server error" }, { status: 400 });
     }
 
     // Get user's current balance
@@ -62,10 +56,7 @@ export async function POST(request: NextRequest) {
 
     // Check if user has sufficient balance
     if (balance < amount) {
-      return NextResponse.json(
-        { error: 'Insufficient balance' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Internal server error" }, { status: 400 });
     }
 
     // Create withdrawal transaction
@@ -108,8 +99,8 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error processing withdrawal:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
+
+
+}

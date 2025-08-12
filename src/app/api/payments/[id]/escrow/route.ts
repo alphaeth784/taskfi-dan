@@ -28,6 +28,7 @@ export async function POST(request: NextRequest, props: { params: Promise<{ id: 
     const session = await getServerSession(authOptions)
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    try {
     const body = await request.json()
     const escrowData = initializeEscrowSchema.parse(body)
 
@@ -149,24 +150,18 @@ export async function POST(request: NextRequest, props: { params: Promise<{ id: 
         status: 'FUNDED',
         releaseDate: updatedPayment.releaseDate,
       }
-    })
-  } catch (error) {
+    });
+      } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Validation error', details: error.errors },
-        { status: 400 }
-      )
-    console.error('Initialize escrow error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Internal server error" }, { status: 400 });
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
 // PUT /api/payments/[id]/escrow - Release or dispute escrow
 export async function PUT(request: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   try {
     const session = await getServerSession(authOptions)
     if (!session) {
+    try {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     const body = await request.json()
     const action = body.action as 'release' | 'dispute'
@@ -335,16 +330,13 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Validation error', details: error.errors },
-        { status: 400 }
-      )
+    return NextResponse.json({ error: "Internal server error" }, { status: 400 });
     console.error('Escrow action error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
 // GET /api/payments/[id]/escrow - Get escrow details
 export async function GET(request: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
+    try {
   try {
     const session = await getServerSession(authOptions)
     if (!session) {
@@ -401,11 +393,11 @@ export async function GET(request: NextRequest, props: { params: Promise<{ id: s
       canRelease: payment.payerId === session.user.id || PermissionService.canAccessUserManagement(session.user.role),
       canDispute: payment.payerId === session.user.id && payment.status === 'ESCROW',
       autoReleaseDate: payment.releaseDate,
-    return NextResponse.json({ escrow: escrowInfo })
+    return NextResponse.json({ escrow: escrowInfo });
   } catch (error) {
     console.error('Get escrow error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
+
+
+}

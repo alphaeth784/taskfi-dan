@@ -73,8 +73,11 @@ export async function POST(request: NextRequest) {
       data: { avatarUrl }
     })
 
-    return NextResponse.json({ avatarUrl })
+    return NextResponse.json({ avatarUrl });
   } catch (error) {
     console.error('Avatar upload error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
+
+
+}

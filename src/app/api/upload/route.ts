@@ -48,18 +48,12 @@ export async function POST(request: NextRequest) {
 
     // Validate file size
     if (file.size > MAX_FILE_SIZE) {
-      return NextResponse.json(
-        { error: 'File size exceeds 10MB limit' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Internal server error" }, { status: 400 });
     }
 
     // Validate file type
     if (!ALLOWED_TYPES.includes(file.type)) {
-      return NextResponse.json(
-        { error: 'File type not allowed' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Internal server error" }, { status: 400 });
     }
 
     // Generate unique filename
@@ -106,10 +100,7 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('Supabase upload error:', error);
-      return NextResponse.json(
-        { error: 'Failed to upload file' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
 
     // Get public URL
@@ -144,12 +135,9 @@ export async function POST(request: NextRequest) {
         type,
       },
     });
-  } catch (error) {
+    } catch (error) {
     console.error('Error uploading file:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 
 export async function DELETE(request: NextRequest) {
@@ -220,8 +208,8 @@ export async function DELETE(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error deleting file:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
+
+
+}

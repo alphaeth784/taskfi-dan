@@ -21,6 +21,7 @@ export async function GET(request: NextRequest, props: { params: Promise<{ id: s
   const params = await props.params;
   try {
     const session = await getServerSession(authOptions)
+    try {
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     // Verify job exists
@@ -107,13 +108,10 @@ export async function GET(request: NextRequest, props: { params: Promise<{ id: s
       averageEstimatedDays: applications.length > 0
         ? applications.reduce((sum, app) => sum + app.estimatedDays, 0) / applications.length
         : 0,
-    return NextResponse.json({ applications, stats })
+    return NextResponse.json({ applications, stats });
   } catch (error) {
     console.error('Get applications error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
 // POST /api/jobs/[id]/applications - Apply to a job
 export async function POST(request: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -123,6 +121,7 @@ export async function POST(request: NextRequest, props: { params: Promise<{ id: 
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     // Only freelancers can apply
     if (!PermissionService.canApplyToJobs(session.user.role)) {
+    try {
       return NextResponse.json({ error: 'Only freelancers can apply to jobs' }, { status: 403 })
     const body = await request.json()
     const applicationData = createApplicationSchema.parse(body)
@@ -223,23 +222,17 @@ export async function POST(request: NextRequest, props: { params: Promise<{ id: 
       }
     })
 
-    return NextResponse.json({ application }, { status: 201 })
-  } catch (error) {
+    return NextResponse.json({ application }, { status: 201 });
+      } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Validation error', details: error.errors },
-        { status: 400 }
-      )
-    console.error('Create application error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
-// PUT /api/jobs/[id]/applications - Accept or reject applications (batch or single)
+    return NextResponse.json({ error: "Internal server error" }, { status: 400 });
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+// PUT /api/jobs/[id]/applications - Accept or reject applications (batch or single);
 export async function PUT(request: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   try {
     const session = await getServerSession(authOptions)
+    try {
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     const body = await request.json()
@@ -433,16 +426,15 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
       return updated
     })
 
-    return NextResponse.json({ application: updatedApplication })
+    return NextResponse.json({ application: updatedApplication });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Validation error', details: error.errors },
-        { status: 400 }
-      )
+    return NextResponse.json({ error: "Internal server error" }, { status: 400 });
     console.error('Update application error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
+
+
+}

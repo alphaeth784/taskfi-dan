@@ -320,11 +320,8 @@ export async function GET(request: NextRequest) {
         score: healthScore,
       },
     })
-  } catch (error) {
+    } catch (error) {
     console.error('Admin dashboard error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

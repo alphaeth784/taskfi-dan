@@ -21,10 +21,7 @@ export async function POST(
 
     // Validate input
     if (packageIndex === undefined || !packageData) {
-      return NextResponse.json(
-        { error: 'Package information is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Internal server error" }, { status: 400 });
     }
 
     // Get gig details
@@ -48,10 +45,7 @@ export async function POST(
 
     // Check if user is trying to order their own gig
     if (gig.freelancerId === session.user.id) {
-      return NextResponse.json(
-        { error: 'You cannot order your own gig' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Internal server error" }, { status: 400 });
     }
 
     // Get current user details
@@ -155,10 +149,8 @@ export async function POST(
         status: 'IN_PROGRESS',
       },
     });
-  } catch (error) {
+    } catch (error) {
     console.error('Error creating gig order:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
+}

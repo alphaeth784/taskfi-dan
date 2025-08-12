@@ -1,0 +1,450 @@
+[
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/admin/dashboard/route.ts",
+    "fixes": [
+      "Added semicolon to return statement",
+      "Added semicolon to status return"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/admin/users/route.ts",
+    "fixes": [
+      "Added semicolon to return statement",
+      "Added semicolon to return statement",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/admin/users/[id]/route.ts",
+    "fixes": [
+      "Added semicolon to return statement",
+      "Added semicolon to return statement",
+      "Added semicolon to return statement",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/analytics/route.ts",
+    "fixes": [
+      "Added semicolon to status return"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/categories/route.ts",
+    "fixes": [
+      "Added semicolon to return statement",
+      "Added semicolon to return statement",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/categories/[id]/route.ts",
+    "fixes": [
+      "Added semicolon to return statement",
+      "Added semicolon to return statement",
+      "Added semicolon to return statement",
+      "Added semicolon to return statement",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/categories/[id]/route.ts",
+    "fixes": [
+      "Added 5 missing closing braces"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/gigs/route.ts",
+    "fixes": [
+      "Added semicolon to return statement",
+      "Added semicolon to return statement",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/gigs/[id]/route.ts",
+    "fixes": [
+      "Added semicolon to return statement",
+      "Added semicolon to return statement",
+      "Added semicolon to return statement",
+      "Added semicolon to return statement",
+      "Added semicolon to return statement",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/gigs/[id]/route.ts",
+    "fixes": [
+      "Added 17 missing closing braces"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/gigs/[id]/order/route.ts",
+    "fixes": [
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/gigs/[id]/purchase/route.ts",
+    "fixes": [
+      "Added semicolon to return statement",
+      "Added semicolon to status return",
+      "Added semicolon to status return"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/gigs/[id]/purchase/route.ts",
+    "fixes": [
+      "Added 8 missing closing braces"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/jobs/route.ts",
+    "fixes": [
+      "Added semicolon to return statement",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/jobs/route.ts",
+    "fixes": [
+      "Added 2 missing closing braces"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/jobs/[id]/route.ts",
+    "fixes": [
+      "Added semicolon to return statement",
+      "Added semicolon to return statement",
+      "Added semicolon to return statement",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/jobs/[id]/route.ts",
+    "fixes": [
+      "Added 17 missing closing braces"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/jobs/[id]/applications/route.ts",
+    "fixes": [
+      "Added semicolon to return statement",
+      "Added semicolon to return statement",
+      "Added semicolon to return statement",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/jobs/[id]/applications/route.ts",
+    "fixes": [
+      "Added 35 missing closing braces"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/jobs/[id]/applications/[applicationId]/route.ts",
+    "fixes": [
+      "Added semicolon to return statement",
+      "Added semicolon to return statement",
+      "Added semicolon to return statement",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/jobs/[id]/applications/[applicationId]/route.ts",
+    "fixes": [
+      "Added 20 missing closing braces"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/jobs/[id]/messages/route.ts",
+    "fixes": [
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/jobs/[id]/messages/route.ts",
+    "fixes": [
+      "Added 2 missing closing braces"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/jobs/[id]/view/route.ts",
+    "fixes": [
+      "Added semicolon to status return"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/jobs/[id]/view/route.ts",
+    "fixes": [
+      "Added 1 missing closing braces"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/notifications/route.ts",
+    "fixes": [
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/notifications/route.ts",
+    "fixes": [
+      "Added 2 missing closing braces"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/payments/route.ts",
+    "fixes": [
+      "Added semicolon to return statement",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/payments/route.ts",
+    "fixes": [
+      "Added 2 missing closing braces"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/payments/[id]/route.ts",
+    "fixes": [
+      "Added semicolon to return statement",
+      "Added semicolon to return statement",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/payments/[id]/route.ts",
+    "fixes": [
+      "Added 22 missing closing braces"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/payments/[id]/escrow/route.ts",
+    "fixes": [
+      "Added semicolon to return statement",
+      "Added semicolon to return statement",
+      "Added semicolon to return statement",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/payments/[id]/escrow/route.ts",
+    "fixes": [
+      "Added 29 missing closing braces"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/upload/route.ts",
+    "fixes": [
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/upload/route.ts",
+    "fixes": [
+      "Added 2 missing closing braces"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/users/route.ts",
+    "fixes": [
+      "Added semicolon to return statement",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/users/route.ts",
+    "fixes": [
+      "Added 3 missing closing braces"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/users/[id]/route.ts",
+    "fixes": [
+      "Added semicolon to return statement",
+      "Added semicolon to return statement",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/users/[id]/route.ts",
+    "fixes": [
+      "Added 9 missing closing braces"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/users/check-username/route.ts",
+    "fixes": [
+      "Added semicolon to return statement",
+      "Added semicolon to status return",
+      "Added semicolon to status return"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/users/check-username/route.ts",
+    "fixes": [
+      "Added 1 missing closing braces"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/users/settings/notifications/route.ts",
+    "fixes": [
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/users/settings/notifications/route.ts",
+    "fixes": [
+      "Added 2 missing closing braces"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/users/settings/privacy/route.ts",
+    "fixes": [
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/users/settings/privacy/route.ts",
+    "fixes": [
+      "Added 2 missing closing braces"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/users/upload/avatar/route.ts",
+    "fixes": [
+      "Added semicolon to return statement"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/users/upload/avatar/route.ts",
+    "fixes": [
+      "Added 1 missing closing braces"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/wallet/route.ts",
+    "fixes": [
+      "Added semicolon to return statement",
+      "Added semicolon to return statement"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/wallet/route.ts",
+    "fixes": [
+      "Added 2 missing closing braces"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/wallet/withdraw/route.ts",
+    "fixes": [
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return",
+      "Added semicolon to status return"
+    ]
+  },
+  {
+    "file": "/project/workspace/alphaeth784/taskfi-dan/src/app/api/wallet/withdraw/route.ts",
+    "fixes": [
+      "Added 1 missing closing braces"
+    ]
+  }
+]

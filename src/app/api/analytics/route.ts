@@ -41,13 +41,11 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json(analytics);
-  } catch (error) {
+    } catch (error) {
     console.error('Error fetching analytics:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
+}
 
 async function getPlatformAnalytics(startDate: Date) {
   // Platform overview stats
@@ -179,6 +177,7 @@ async function getPlatformAnalytics(startDate: Date) {
       topHirers,
     },
   };
+}
 
 async function getUserAnalytics(userId: string, startDate: Date, userRole: string) {
   if (userRole === 'FREELANCER') {
@@ -188,6 +187,7 @@ async function getUserAnalytics(userId: string, startDate: Date, userRole: strin
   }
   
   return {};
+}
 
 async function getFreelancerAnalytics(freelancerId: string, startDate: Date) {
   // Earnings and job stats
@@ -346,4 +346,5 @@ async function getHirerAnalytics(hirerId: string, startDate: Date) {
     },
     recentJobs: jobs.slice(0, 5), // Most recent 5 jobs
   };
+}
 }

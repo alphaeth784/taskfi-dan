@@ -110,13 +110,10 @@ export async function GET(request: NextRequest) {
         total,
         pages: Math.ceil(total / limit),
       },
-    })
-  } catch (error) {
+    });
+    } catch (error) {
     console.error('Get users error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 
 // POST /api/users - Create new user
@@ -128,38 +125,26 @@ export async function POST(request: NextRequest) {
     // Check if username is available
     const isAvailable = await WalletVerificationService.isUsernameAvailable(userData.username)
     if (!isAvailable) {
-      return NextResponse.json(
-        { error: 'Username already taken' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: "Internal server error" }, { status: 400 });
     }
 
     // Check if wallet address is already registered
     const existingUser = await WalletVerificationService.getUserByWallet(userData.walletAddress)
     if (existingUser) {
-      return NextResponse.json(
-        { error: 'Wallet address already registered' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: "Internal server error" }, { status: 400 });
     }
 
     // Create user
     const user = await WalletVerificationService.createUser(userData)
 
-    return NextResponse.json({ user }, { status: 201 })
-  } catch (error) {
+    return NextResponse.json({ user }, { status: 201 });
+    } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Validation error', details: error.errors },
-        { status: 400 }
-      )
+    return NextResponse.json({ error: "Internal server error" }, { status: 400 });
     }
 
     console.error('Create user error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 
 // PUT /api/users - Update current user
@@ -175,18 +160,17 @@ export async function PUT(request: NextRequest) {
 
     const user = await WalletVerificationService.updateUser(session.user.id, updateData)
 
-    return NextResponse.json({ user })
+    return NextResponse.json({ user });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Validation error', details: error.errors },
-        { status: 400 }
-      )
+    return NextResponse.json({ error: "Internal server error" }, { status: 400 });
     }
 
     console.error('Update user error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
+
+
+}

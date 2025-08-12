@@ -106,12 +106,9 @@ export async function GET(
       hasMore: messages.length === limit,
       currentPage: page,
     });
-  } catch (error) {
+    } catch (error) {
     console.error('Error fetching messages:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 
 export async function POST(
@@ -129,10 +126,7 @@ export async function POST(
     const { content, type = 'TEXT', fileUrl } = body;
 
     if (!content && !fileUrl) {
-      return NextResponse.json(
-        { error: 'Message content or file is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Internal server error" }, { status: 400 });
     }
 
     // Check if user has access to this job conversation
@@ -161,10 +155,7 @@ export async function POST(
     let receiverId: string;
     if (isHirer) {
       if (!acceptedFreelancer) {
-        return NextResponse.json(
-          { error: 'No freelancer assigned to this job yet' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: "Internal server error" }, { status: 400 });
       }
       receiverId = acceptedFreelancer.freelancerId;
     } else {
@@ -222,8 +213,8 @@ export async function POST(
     });
   } catch (error) {
     console.error('Error sending message:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
+
+
+}

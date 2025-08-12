@@ -130,20 +130,14 @@ export async function GET(request: NextRequest) {
         total,
         pages: Math.ceil(total / limit),
       },
-    })
-  } catch (error) {
+    });
+    } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Validation error', details: error.errors },
-        { status: 400 }
-      )
+    return NextResponse.json({ error: "Internal server error" }, { status: 400 });
     }
 
     console.error('Get payments error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 
 // POST /api/payments - Create payment (for manual escrow funding)
@@ -159,17 +153,11 @@ export async function POST(request: NextRequest) {
 
     // Validate that either jobId or gigId is provided
     if (!paymentData.jobId && !paymentData.gigId) {
-      return NextResponse.json(
-        { error: 'Either jobId or gigId must be provided' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: "Internal server error" }, { status: 400 });
     }
 
     if (paymentData.jobId && paymentData.gigId) {
-      return NextResponse.json(
-        { error: 'Cannot provide both jobId and gigId' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: "Internal server error" }, { status: 400 });
     }
 
     // Verify job or gig exists and user can pay for it
@@ -261,18 +249,17 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    return NextResponse.json({ payment }, { status: 201 })
-  } catch (error) {
+    return NextResponse.json({ payment }, { status: 201 });
+    } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Validation error', details: error.errors },
-        { status: 400 }
-      )
+    return NextResponse.json({ error: "Internal server error" }, { status: 400 });
     }
 
     console.error('Create payment error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
+
+
+}
